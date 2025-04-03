@@ -24,8 +24,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.Configure<MailNotification>(
-    builder.Configuration.GetSection(MailNotification.GmailOptionsKey));
+builder.Services.Configure<GmailSettings>(
+    builder.Configuration.GetSection(GmailSettings.GmailOptionsKey));
 
 // DB repos
 builder.Services.AddScoped<IAdRepository, AdRepository>();

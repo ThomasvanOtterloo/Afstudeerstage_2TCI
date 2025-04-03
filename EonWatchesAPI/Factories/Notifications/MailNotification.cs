@@ -1,16 +1,23 @@
+using System.Net.Mail;
+
 namespace EonWatchesAPI.Factories.Notifications;
 
 public class MailNotification : INotification
 {
-    public const string GmailOptionsKey = "GmailOptions";
-    public string Host { get; set; }
-    public int Port { get; set; }
-    public string email { get; set; }
-    public string password { get; set; }
+    private readonly GmailSettings _gmailSettings;
 
+    public MailNotification(GmailSettings gmailSettings)
+    {
+        _gmailSettings = gmailSettings;
+    }
 
     public void SendNotification(string message)
     {
-        throw new NotImplementedException();
+        MailMessage mailMessage = new MailMessage();
+
+
+
+
+
     }
 }
