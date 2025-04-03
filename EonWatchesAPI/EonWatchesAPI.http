@@ -1,0 +1,6 @@
+@EonWatchesAPI_HostAddress = http://localhost:5022
+
+GET {{EonWatchesAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
