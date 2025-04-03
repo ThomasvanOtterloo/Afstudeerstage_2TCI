@@ -1,8 +1,10 @@
 using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
+using EonWatchesAPI.Factories.Notifications;
 using EonWatchesAPI.Services.I_Services;
 using EonWatchesAPI.Services.Services;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +14,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
+
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.Configure<MailNotification>(
+    builder.Configuration.GetSection(MailNotification.GmailOptionsKey));
 
 // DB repos
 builder.Services.AddScoped<IAdRepository, AdRepository>();
