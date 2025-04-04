@@ -1,4 +1,5 @@
 using EonWatchesAPI.DbContext;
+using EonWatchesAPI.Factories.Notifications;
 using EonWatchesAPI.Services.I_Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,12 +10,14 @@ namespace EonWatchesAPI.Controllers;
 public class TriggerController
 {
     private readonly ITriggerService _triggerService;
-    
-    public TriggerController(ITriggerService triggerService)
+    private readonly INotification _notification;
+
+    public TriggerController(ITriggerService triggerService, INotification notification)
     {
         _triggerService = triggerService;
+        this._notification = notification;
     }
-    
+
     [HttpGet]
     public async Task<IEnumerable<Trigger>> GetTriggers()
     {
@@ -33,4 +36,19 @@ public class TriggerController
         return await _triggerService.CreateTrigger(trigger);
     }
     
+    [HttpPost("mail")]
+    public async Task<string> CreateTrigger(SendEmailRequest mail)
+    {
+        try
+        {
+            await _notification.SendNotification(mail);
+            return "Email sent successfully";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return ("Error: " + e.Message + " " + e.InnerException?.Message + " " + e.StackTrace + " " + e.Source + " " + e.TargetSite);
+            throw;
+        }
+    }
 }

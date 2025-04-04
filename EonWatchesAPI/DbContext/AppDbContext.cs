@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EonWatchesAPI.DbContext;
 
-public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
+public partial class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
     public DbSet<Ad> Ads { get; set; }
     public DbSet<Trader> Traders { get; set; }
@@ -14,7 +14,6 @@ public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
         
     }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

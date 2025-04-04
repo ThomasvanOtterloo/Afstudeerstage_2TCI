@@ -2,5 +2,6 @@ namespace EonWatchesAPI.Factories.Notifications;
 
 public interface INotification
 {
-    public void SendNotification(string message);
+    public Task SendNotification(SendEmailRequest message);
+
 }
