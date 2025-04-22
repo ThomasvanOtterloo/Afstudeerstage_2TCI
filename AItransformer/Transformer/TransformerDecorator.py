@@ -1,16 +1,9 @@
-class TransformerDecorator:
-    """
-    A decorator for the Transformer class that adds functionality to the transform method.
-    """
+# TransformerDecorator.py
+from ITransformer import ITransformer
 
-    def __init__(self, transformer):
-        self.transformer = transformer
+class TransformerDecorator(ITransformer):
+    def __init__(self, transformer: ITransformer):
+        self._wrapped = transformer
 
-    def transform(self, data):
-        """
-        Transforms the data using the transformer instance.
-        """
-        # Add pre-processing or validation logic here if needed
-        transformed_data = self.transformer.transform(data)
-        # Add post-processing or logging logic here if needed
-        return transformed_data
+    def transformData(self, message: str) -> str:
+        return self._wrapped.transformData(message)

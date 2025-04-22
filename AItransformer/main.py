@@ -7,6 +7,8 @@ from Load.MicrosoftSQLServer import MicrosoftSQLServer
 from Queue.Queue import setup_queues
 from Extract.QueueService import send_test_message
 import pyodbc
+
+from Transformer.BaseTransformerModel import WatchEntityExtractor
 # from Extract.ExtractDataController import ExtractDataController
 from Transformer.TransformDataController import TransformDataController
 # from Extract.WhatsAppApi import WhatsAppApi
@@ -15,6 +17,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 if __name__ == '__main__':
+    transformer = WatchEntityExtractor()
     extractor = ExtractDataController()
 
 

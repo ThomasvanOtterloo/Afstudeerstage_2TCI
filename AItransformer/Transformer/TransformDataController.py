@@ -5,11 +5,15 @@ from numpy.f2py.auxfuncs import throw_error
 
 from Load.LoadDataController import LoadDataController
 from Load.MicrosoftSQLServer import MicrosoftSQLServer
+from BaseTransformerModel import BaseTransformerModel
 
 class TransformDataController:
-    def __init__(self):
+    def __init__(self, transformer):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
         self.channel = self.connection.channel()
+        self.base = transformer
+        self.decorator = None
+
 
 
     def start_listening(self):
@@ -22,14 +26,17 @@ class TransformDataController:
 
     def handle_message(self, ch, method, properties, body):
         try:
-            message = json.loads(body)
-            print("Received message:", message)
+            print("Received message:", body)
 
             # 👉 Place your transformation logic here
-            self.process(message)
+            newJSON = self.process(body)
 
             # ✅ Acknowledge successful processing
             ch.basic_ack(delivery_tag=method.delivery_tag)
+
+            print("Message validation passed.")
+            db = LoadDataController()
+            db.load_data(MicrosoftSQLServer(), body)
 
         except Exception as e:
             print("Error processing message:", str(e))
@@ -41,21 +48,19 @@ class TransformDataController:
         # Your real logic would go here
         print(f"[TransformDataController] Processing payload: {message}")
 
-        # Simulate processing time
-        import time
-        time.sleep(5)
-        print(f"[TransformDataController] Finished processing payload: {message}")
+        #transformer processing:
+        json_ad = self.transformer.transformData(message)
 
         # Apply logic for validating the message
-        if not self.validate_message(message):
+        if not self.validate_json(json_ad):
             raise ValueError("Invalid message format")
 
-        print("Message validation passed.")
-        db = LoadDataController()
-        db.load_data(MicrosoftSQLServer(), message)
+        return json_ad
 
 
-    def validate_message(self, message):
+
+
+    def validate_json(self, message):
         if not isinstance(message, str):
             return False
         try:
