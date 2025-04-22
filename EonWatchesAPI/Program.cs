@@ -30,6 +30,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.Configure<GmailSettings>(
     builder.Configuration.GetSection(GmailSettings.GmailOptionsKey));
 
+// background services
+builder.Services.AddHostedService<TriggerCheckerService>();
+
+
 // DB repos
 builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<ITraderRepository, TraderRepository>();

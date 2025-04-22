@@ -8,7 +8,7 @@ class IDatabaseConnection(ABC):
         pass
 
     @abstractmethod
-    def dummy_write(self):
+    def write(self, json_data):
         pass
 
     def close(self):

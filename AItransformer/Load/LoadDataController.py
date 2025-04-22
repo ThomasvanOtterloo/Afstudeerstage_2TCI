@@ -3,9 +3,11 @@ from Load.DatabaseConnection import IDatabaseConnection
 
 class LoadDataController:
 
-    @staticmethod
-    def load_data(database: IDatabaseConnection):
+    def __init__(self):
+        pass
+
+    def load_data(self, database: IDatabaseConnection, data=None):
         database.connect()
-        database.dummy_write()
+        database.write(data)
         database.close()
         print("✅ Data loaded successfully")
