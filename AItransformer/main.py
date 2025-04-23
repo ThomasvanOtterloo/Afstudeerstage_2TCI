@@ -14,10 +14,15 @@ from Transformer.TransformDataController import TransformDataController
 # from Extract.WhatsAppApi import WhatsAppApi
 import requests
 from flask import Flask, request, jsonify
+
+from Transformer.TransformerDecorator import TransformerDecorator
+
 app = Flask(__name__)
 
 if __name__ == '__main__':
     transformer = WatchEntityExtractor()
+    decorator = TransformerDecorator(transformer)
+
     extractor = ExtractDataController()
 
 
@@ -29,7 +34,7 @@ if __name__ == '__main__':
 
 
     # Start the TransformDataController to listen for messages
-    transform_controller = TransformDataController()
+    transform_controller = TransformDataController(transformer, decorator)
     transform_controller.start_listening()
 
 

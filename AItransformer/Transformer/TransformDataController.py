@@ -2,19 +2,16 @@ import pika
 import json
 
 from numpy.f2py.auxfuncs import throw_error
-
+from ua_parser.loaders import load_data
 from Load.LoadDataController import LoadDataController
 from Load.MicrosoftSQLServer import MicrosoftSQLServer
-from BaseTransformerModel import BaseTransformerModel
 
 class TransformDataController:
-    def __init__(self, transformer):
+    def __init__(self, transformer, decorator):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
         self.channel = self.connection.channel()
         self.base = transformer
-        self.decorator = None
-
-
+        self.decorator = decorator
 
     def start_listening(self):
         print("[TransformDataController] Listening for messages on 'main_queue'...")
@@ -27,40 +24,49 @@ class TransformDataController:
     def handle_message(self, ch, method, properties, body):
         try:
             print("Received message:", body)
-
-            # 👉 Place your transformation logic here
             newJSON = self.process(body)
 
             # ✅ Acknowledge successful processing
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
-            print("Message validation passed.")
-            db = LoadDataController()
-            db.load_data(MicrosoftSQLServer(), body)
-
+            load_data(newJSON)
         except Exception as e:
             print("Error processing message:", str(e))
 
             # ❌ Reject message so it goes to dead-letter queue
             ch.basic_reject(delivery_tag=method.delivery_tag, requeue=False)
 
+    def load_data(self, message):
+        db = LoadDataController()
+        db.load_data(MicrosoftSQLServer(), message)
+
     def process(self, message):
         # Your real logic would go here
         print(f"[TransformDataController] Processing payload: {message}")
 
+        # Pre-processing:
+        pre_processing_result = self.pre_processing(message)
+
+        # based on pro-processing result, pick transformer or decorator
+        # logic here.
+
         #transformer processing:
-        json_ad = self.transformer.transformData(message)
+        json_ad = self.base.transformData(pre_processing_result)
 
-        # Apply logic for validating the message
-        if not self.validate_json(json_ad):
-            raise ValueError("Invalid message format")
+        post_processing_result = self.post_processing(json_ad)
+        return post_processing_result
 
-        return json_ad
+    def pre_processing(self, message):
+        if not isinstance(message, str):
+            return False
+        try:
+            json.loads(message)
+            return True
+        except json.JSONDecodeError:
+            return False
 
 
-
-
-    def validate_json(self, message):
+    def post_processing(self, message):
         if not isinstance(message, str):
             return False
         try:
