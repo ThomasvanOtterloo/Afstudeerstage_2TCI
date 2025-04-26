@@ -1,6 +1,7 @@
 # Queue.py
 import pika
 
+
 def setup_queues():
     connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
     channel = connection.channel()

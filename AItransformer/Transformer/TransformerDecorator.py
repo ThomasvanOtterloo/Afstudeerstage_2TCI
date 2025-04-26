@@ -1,5 +1,6 @@
 # TransformerDecorator.py
-from ITransformer import ITransformer
+from Transformer.ITransformer import ITransformer
+
 
 class TransformerDecorator(ITransformer):
     def __init__(self, transformer: ITransformer):

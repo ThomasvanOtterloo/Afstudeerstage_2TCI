@@ -1,53 +1,85 @@
+from abc import ABC
+
 import torch
-import time
 from unsloth import FastLanguageModel
 from unsloth.chat_templates import get_chat_template
+from Transformer.ITransformer import ITransformer
 
-from ITransformer import ITransformer
 
 class BaseTransformerModel(ITransformer):
-    def __init__(self):
-        with open("Transformer/system_prompt.txt", "r") as f:
-            self.system_prompt = f.read()
 
-        self.model, self.tokenizer = FastLanguageModel.from_pretrained(
-            model_name="unsloth/llama-3-8b-Instruct",
-            max_seq_length=2048,
+    def __init__(self):
+        # 1.  Load model & tokenizer
+        self.model, tok = FastLanguageModel.from_pretrained(
+            "Qwen/Qwen2.5-7B-Instruct",
+            max_seq_length=4048,
             dtype=None,
         )
-        FastLanguageModel.for_inference(self.model)
+        # 2.  Attach the chat-ML template you like
         self.tokenizer = get_chat_template(
-            self.tokenizer,
+            tok,
             chat_template="chatml",
-            mapping={"role": "from", "content": "value", "user": "human", "assistant": "gpt"},
+            mapping={
+                "role": "from",
+                "content": "value",
+                "user": "human",
+                "assistant": "gpt",
+            },
             map_eos_token=True,
         )
+        FastLanguageModel.for_inference(self.model)
 
-    def transformData(self, message):
-        messages = [
-            {"from": "system", "value": self.system_prompt},
-            {"from": "human", "value": message},
-        ]
+        # 3.  Cache system prompt as tokens (on the correct device)
+        with open("Transformer/system_prompt.txt", encoding="utf-8") as f:
+            self.system_prompt = f.read()
 
-        inputs = self.tokenizer.apply_chat_template(
-            messages,
+        self.system_ids = self.tokenizer.apply_chat_template(
+            [{"role": "system", "content": self.system_prompt}],
             tokenize=True,
-            add_generation_prompt=True,
+            add_generation_prompt=False,
+            return_tensors="pt",
+        ).to(self.model.device)  # <-- stays on GPU/CPU
+
+    # ------------------------------------------------------------------ #
+    # Helpers
+    # ------------------------------------------------------------------ #
+    def _build_inputs(self, user_message: str) -> torch.Tensor:
+        """
+        Tokenise the new user turn and append to the cached system ids.
+        """
+        user_ids = self.tokenizer.apply_chat_template(
+            [{"role": "user", "content": user_message}],
+            tokenize=True,
+            add_generation_prompt=True,  # tells model: now you speak
             return_tensors="pt",
         ).to(self.model.device)
+        return torch.cat([self.system_ids, user_ids], dim=1)
 
-        outputs = self.model.generate(
-            input_ids=inputs,
-            max_new_tokens=200,
-            do_sample=True,
-            top_p=0.95,
-            temperature=0.05,
-        )
+    # ------------------------------------------------------------------ #
+    # Public API
+    # ------------------------------------------------------------------ #
+    def transformData(
+            self,
+            message: str,
+            max_new_tokens: int = 4048,
+            top_p: float = 0.95,
+            temperature: float = 0.15,
+    ) -> str:
+        input_ids = self._build_inputs(message)
 
-        output_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        if "<|im_start|>assistant" in output_text:
-            response_normal = output_text.split("<|im_start|>assistant")[-1].strip()
-        else:
-            response_normal = output_text.strip()
+        with torch.no_grad():
+            output = self.model.generate(
+                input_ids=input_ids,
+                max_new_tokens=max_new_tokens,
+                do_sample=True,
+                top_p=top_p,
+                temperature=temperature,
+            )
 
-        return response_normal
+        # strip the prompt part so only the assistant answer remains
+        generated_ids = output[0][input_ids.shape[1]:]  # drop prefix tokens
+        text = self.tokenizer.decode(
+            generated_ids, skip_special_tokens=True
+        ).strip()
+
+        return text

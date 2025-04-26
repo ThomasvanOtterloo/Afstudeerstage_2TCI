@@ -1,0 +1,13 @@
+from enum import Enum
+
+class DatabaseType(Enum):
+    """
+    Enum for different database types.
+    """
+    SQLITE = "sqlite"
+    POSTGRESQL = "postgresql"
+    MYSQL = "mysql"
+    MONGODB = "mongodb"
+    REDIS = "redis"
+    ORACLE = "oracle"
+    SQLSERVER = "sqlserver"

@@ -3,6 +3,7 @@ import threading
 import requests
 from flask import Flask, request, jsonify
 
+
 class WhatsAppApi:
     def __init__(self):
         self.app = Flask(__name__)
@@ -11,7 +12,7 @@ class WhatsAppApi:
 
     def webhook(self):
         data = request.get_json()
-        #print("📩 Webhook received:", data)
+        print("📩 Webhook received:", data)
         for listener in self._listeners:
             listener(data)
         return {"status": "ok"}, 200
@@ -21,6 +22,4 @@ class WhatsAppApi:
 
     def start(self, port=5006):
         # Run Flask in a background thread so it doesn't block
-        threading.Thread(target=lambda: self.app.run(host="0.0.0.0", port=port), daemon=True).start()
-
-
+        threading.Thread(target=lambda: self.app.run(host="0.0.0.0", port=5006), daemon=True).start()
