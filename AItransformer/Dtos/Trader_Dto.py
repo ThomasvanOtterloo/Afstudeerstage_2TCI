@@ -3,5 +3,5 @@ from dataclasses import dataclass
 
 @dataclass
 class TraderDto:
-    number: str
+    phoneNumber: str
     name: str

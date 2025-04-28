@@ -13,7 +13,7 @@ class MicrosoftSQLServer(IDatabaseConnection):
         self.database = database
         self.conn = None
         self.cursor = None
-        self.table_name = "AdsTest"
+        self.table_name = "Ads"
         self.table_columns = None
 
     def get_table_columns(self):
@@ -50,80 +50,53 @@ class MicrosoftSQLServer(IDatabaseConnection):
         except Exception as e:
             print(f"❌ Connection failed: {e}")
 
-    def write_ad(self, json_data: dict):
-        print(f"Attempt to Write ad: {json_data}")
+    def write_ad(self, json_data: list):
+        print(f"Attempt to Write ad(s): {json_data}")
+
+        # Make sure json_data is a list
         rows = json_data if isinstance(json_data, list) else [json_data]
 
         for row in rows:
             known = {}
             unknown = {}
 
+            # Step 1: Separate known and unknown columns
             for k, v in row.items():
                 if k in self.table_columns and k != "Other":
                     known[k] = json.dumps(v) if isinstance(v, dict) else v
                 elif k not in self.table_columns:
                     unknown[k] = v
 
-            # Handle 'Other' field
-            if "Other" in row:
-                try:
-                    # Merge existing 'Other' with unknown keys
-                    existing_other = row["Other"] if isinstance(row["Other"], dict) else json.loads(row["Other"])
-                    unknown = {**existing_other, **unknown}
-                except Exception as e:
-                    print(f"⚠️ Failed to parse 'Other' JSON: {e}")
-
+            # Step 2: Merge unknown fields into 'Other'
             if "Other" in self.table_columns:
-                known["Other"] = json.dumps(unknown)
+                # Try to preserve existing 'Other' field if present
+                existing_other = {}
+                if "Other" in row:
+                    try:
+                        existing_other = row["Other"] if isinstance(row["Other"], dict) else json.loads(row["Other"])
+                    except Exception as e:
+                        print(f"⚠️ Failed to parse 'Other' JSON: {e}")
+                combined_other = {**existing_other, **unknown}
+                known["Other"] = json.dumps(combined_other)
 
+            # Step 3: Prepare SQL Insert
             columns = ", ".join(known.keys())
             placeholders = ", ".join(["?"] * len(known))
             values = list(known.values())
 
             query = f"INSERT INTO {self.table_name} ({columns}) VALUES ({placeholders})"
-            self.cursor.execute(query, values)
-        print(f"✅ {len(rows)} row(s) queued")
 
-    def write_trader(self, trader: TraderDto):
-        print(f"Attempt to Write trader: {trader}")
-        # assume trader *is* a TraderDto, not a dict
-        sql = """
-        MERGE Traders WITH (HOLDLOCK) AS tgt
-        USING (SELECT ? AS Number, ? AS Name) AS src
-          ON tgt.Number = src.Number
-        WHEN MATCHED THEN
-            UPDATE SET Name = src.Name
-        WHEN NOT MATCHED THEN
-            INSERT (Number, Name) VALUES (src.Number, src.Name);
-        """
+            try:
+                self.cursor.execute(query, values)
+            except Exception as e:
+                print(f"❌ Failed to insert row: {e}\nRow data: {row}")
 
-        try:
-            self.cursor.execute(sql, trader.number, trader.name)
-        except Exception as e:
-            print(f"❌ Error inserting trader: {e}")
-            raise
+        print(f"✅ {len(rows)} row(s) queued for insertion.")
 
-    def write_group(self, group: GroupDto):
-        print(f"Attempt to Write group: {group}")
+    def getWhitelistedGroups(self, query):
+        pass
 
-        sql = """
-           MERGE Groups WITH (HOLDLOCK) AS tgt
-           USING (SELECT ? AS GroupId, ? AS GroupName) AS src
-             ON tgt.GroupId = src.GroupId
-           WHEN MATCHED THEN
-               UPDATE SET GroupName = src.GroupName
-           WHEN NOT MATCHED THEN
-               INSERT (GroupId, GroupName)
-               VALUES (src.GroupId, src.GroupName);
-           """
-        try:
-            self.cursor.execute(sql, group.groupId, group.groupName)
-            print("✅ Group upsert succeeded")
-        except Exception as e:
-            print(f"❌ Error inserting/updating group: {e}")
-            raise
-
-    def read(self, query):
+    def getChannelId(self, query):
         pass
 
     def close(self):

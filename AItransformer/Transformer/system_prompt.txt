@@ -4,7 +4,7 @@
     ✅ Detect only the watch-related entities that are explicitly written in the message
     ✅ Assign ALL those words that tell something about the watch to the correct field name in the output JSON
     ✅ If the message does not imply buying, selling, return NULL.
-    ✅ Each distinct watch in a sale must have its own JSON object like {object1}, {object2}, etc.
+    ✅ Each distinct watch in a sale must have its own JSON object within a wrapper like [{object1}, {object2}], etc.
     ✅ If the message contains multiple watches, return multiple JSON objects.
 
     ⚠️ Do not guess, infer, or fill in fields based on prior knowledge, context, or assumptions.
@@ -57,12 +57,12 @@ When explicitly seen in the input, use these naming of the entities: in the [X, 
 - "Condition" (string) [new, unworn, used, mint, excellent]
 - "Movement" (string) [automatic, manual, quartz, mecaquartz, spring drive]
 - "Caliber" (string) [4130, 3235, L951.1, 9300, 215 PS]
-- "FullSet" (boolean) [full set, complete, box & papers, full kit, everything included]
-- "Paper" (boolean) [card, papers, original paper, stamped, cert]
-- "Tags" (boolean) [tag, hang tag, swing tag, barcode tag, original tags]
+- "FullSet" (boolean) [full set, complete, box & papers, full kit, everything included] = True
+- "Paper" (boolean) [card, papers, original paper, stamped, cert] = True
+- "Tags" (boolean) [tag, hang tag, swing tag, barcode tag, original tags] = True
 - "Location" (string) [Dubai, HK, NYC, Singapore, EU]
-- "Warranty" (boolean) [warranty, under warranty, still covered, valid warranty, Rolex warranty]
-- "Shipping" (boolean) [shipping included, incl. shipping, free ship, delivery included, ship worldwide]
+- "Warranty" (boolean) [warranty, under warranty, still covered, valid warranty, Rolex warranty] = True
+- "Shipping" (boolean) [shipping included, incl. shipping, free ship, delivery included, ship worldwide] = True
 - "Bracelet" (string) [Jubilee, Oyster, Rubber, Leather, NATO]
 
 If a term clearly refers to a entity but doesn’t match any listed fields above, be sure to still add it and make your own appropriate Key-Value row.

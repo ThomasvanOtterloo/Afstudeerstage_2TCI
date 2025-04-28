@@ -14,15 +14,12 @@ class LoadDataController:
     def database_connection(self, database: IDatabaseConnection):
         self.database = database
 
-    def load_data(self, ad: dict, trader: TraderDto, group: GroupDto):
+    def load_data(self, ad: list):
         try:
             self.database.write_ad(ad)
-            self.database.write_trader(trader)
-            self.database.write_group(group)
-            self.end_transaction()  # ← commits once
+            self.end_transaction()  # commit all changes
         except Exception as e:
-            print(f"❌ load_data failed, rolling back: {e}")
-            self.database.conn.rollback()  # ← undo everything
+            self.database.conn.rollback()  # rollback everything
             raise
 
     def end_transaction(self):

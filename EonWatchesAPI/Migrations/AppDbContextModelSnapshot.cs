@@ -33,75 +33,220 @@ namespace EonWatchesAPI.Migrations
                     b.Property<bool>("Archived")
                         .HasColumnType("bit");
 
+                    b.Property<string>("BatchCode")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Brand")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Caliber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CaseDiameter")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Color")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Condition")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Currency")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool?>("FullSet")
+                        .HasColumnType("bit");
+
                     b.Property<string>("GroupId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAnSeller")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Model")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Movement")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Other")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal?>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ReferenceNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("TraderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TraderId1")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Video")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("YearOfManufacture")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Ads");
+                    b.HasIndex("GroupId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Archived = false,
-                            Brand = "Omega",
-                            CreatedAt = new DateTime(2025, 1, 15, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "USD",
-                            GroupId = "G001",
-                            IsAnSeller = true,
-                            Model = "Speedmaster",
-                            Price = 5999.99m,
-                            ReferenceNumber = "311.30.42.30.01.005"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Archived = false,
-                            Brand = "Rolex",
-                            CreatedAt = new DateTime(2025, 2, 20, 12, 30, 0, 0, DateTimeKind.Utc),
-                            Currency = "USD",
-                            GroupId = "G002",
-                            IsAnSeller = false,
-                            Model = "Submariner",
-                            Price = 8999.50m,
-                            ReferenceNumber = "124060"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Archived = true,
-                            Brand = "Seiko",
-                            CreatedAt = new DateTime(2024, 12, 1, 8, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "EUR",
-                            GroupId = "G003",
-                            IsAnSeller = true,
-                            Model = "Prospex",
-                            Price = 450.00m,
-                            ReferenceNumber = "SRPD21"
-                        });
+                    b.HasIndex("TraderId");
+
+                    b.HasIndex("TraderId1");
+
+                    b.ToTable("Ads");
+                });
+
+            modelBuilder.Entity("EonWatchesAPI.DbContext.Trader", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
+
+                    b.ToTable("Traders");
+                });
+
+            modelBuilder.Entity("EonWatchesAPI.DbContext.Trigger", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Brand")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Model")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("Notified")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReferenceNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TraderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TraderId");
+
+                    b.ToTable("Triggers");
+                });
+
+            modelBuilder.Entity("EonWatchesAPI.DbContext.WhitelistedGroups", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GroupName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TraderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TraderId");
+
+                    b.ToTable("WhitelistedGroups");
+                });
+
+            modelBuilder.Entity("EonWatchesAPI.DbContext.Ad", b =>
+                {
+                    b.HasOne("EonWatchesAPI.DbContext.WhitelistedGroups", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EonWatchesAPI.DbContext.Trader", "Trader")
+                        .WithMany()
+                        .HasForeignKey("TraderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EonWatchesAPI.DbContext.Trader", null)
+                        .WithMany("Ads")
+                        .HasForeignKey("TraderId1");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Trader");
+                });
+
+            modelBuilder.Entity("EonWatchesAPI.DbContext.Trigger", b =>
+                {
+                    b.HasOne("EonWatchesAPI.DbContext.Trader", "Trader")
+                        .WithMany()
+                        .HasForeignKey("TraderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trader");
+                });
+
+            modelBuilder.Entity("EonWatchesAPI.DbContext.WhitelistedGroups", b =>
+                {
+                    b.HasOne("EonWatchesAPI.DbContext.Trader", "Trader")
+                        .WithMany("WhitelistedGroups")
+                        .HasForeignKey("TraderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Trader");
+                });
+
+            modelBuilder.Entity("EonWatchesAPI.DbContext.Trader", b =>
+                {
+                    b.Navigation("Ads");
+
+                    b.Navigation("WhitelistedGroups");
                 });
 #pragma warning restore 612, 618
         }

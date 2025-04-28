@@ -11,6 +11,7 @@ from functools import reduce
 from operator import getitem
 from Dtos.Trader_Dto import TraderDto
 from Dtos.Group_Dto import GroupDto
+from Transformer.MessageProcessingService import MessageProcessingService
 
 
 class TransformDataController:
@@ -20,6 +21,7 @@ class TransformDataController:
         self.base = transformer
         self.decorator = decorator
         self.db = LoadDataController()
+        self.msg_processing_service = MessageProcessingService()
 
     def start_listening(self):
         print("[TransformDataController] Listening for messages on 'main_queue'...")
@@ -43,118 +45,31 @@ class TransformDataController:
             # ❌ Reject message so it goes to dead-letter queue
             ch.basic_reject(delivery_tag=method.delivery_tag, requeue=False)
 
-    def load_data(self, ad: dict, trader: dict, group: dict):
-        self.db.load_data(ad, trader, group)
+    def load_data(self, ad: list):
+        self.db.load_data(ad)
 
     def process(self, message):
         # Your real logic would go here
         print(f"[TransformDataController] Processing payload")
-        message = self.decode_message(message)
+        message = self.msg_processing_service.decode_message(message)
 
         # Pre-processing:
-        ad, trader, group = self.pre_processing(message)
+        ad = self.msg_processing_service.pre_processing(message)
 
-        # transformer processing:
+        if ad.text == '':
+            print("❌ No text found in the message. Probably a media message.")
+            return
         text_output = self.base.transformData(message=ad.text)
 
         # Decorator processing for the image
-        img_output = ad.image  # use image model if you want to extract the watch from a photo
-        video_output = ad.video  # use video model if needed
+        # img_output = ad.image  # use image model if you want to extract the watch from a photo
+        # video_output = ad.video  # use video model if needed
 
         # Post-processing:
-        ad = self.post_processing(text_output, ad)
-        print(f"ad: \n {ad},\n trader:\n {trader} \n group:\n {group}")
+        ad = self.msg_processing_service.post_processing(text_output, ad)
+        print(f"ad: \n {ad}")
         if ad is False:
             print("❌ post_processing failed.")
-            return False
         else:
             print("✅ post_processing succeeded.")
-            self.load_data(ad, trader, group)
-
-    def decode_message(self, message):
-        try:
-            decoded = json.loads(message.decode("utf-8"))
-            return decoded
-        except json.JSONDecodeError as e:
-            print("[decode_message] Error decoding message:", e)
-            return {}
-
-    def pre_processing(self, message):
-        try:
-            # Grab the first message from the list
-            msg = message.get('messages', [{}])[0]
-
-            trader = self.extract_user(msg)
-            ad = self.extract_ad(msg)
-            group = self.extract_group(msg)
-
-            return ad, trader, group
-        except Exception as e:
-            print("[pre_processing] Error decoding message:", e)
-            return '', ''
-
-    def extract_group(self, msg):
-        try:
-            # Grab the first message from the list
-            group = GroupDto(
-                groupId=msg.get('chat_id'),
-                groupName=msg.get('chat_name'),
-            )
-            return group
-        except Exception as e:
-            print("[extract_group] Error decoding message:", e)
-            return None
-    def extract_ad(self, msg):
-        try:
-            # Grab the first message from the list
-            ad = AdDto(
-                messageId=msg.get('id'),
-                groupId=msg.get('chat_id'),
-                groupName=msg.get('chat_name'),
-                text=msg.get('text', {}).get('body') or msg.get('image', {}).get('caption', ''),
-                image=msg.get('image', {}).get('preview', ''),
-                video=msg.get('video', {}).get('preview', '')
-            )
-            return ad
-        except Exception as e:
-            print("[extract_ad] Error decoding message:", e)
-            return None
-
-    def extract_user(self, msg):
-        try:
-            # Grab the first message from the list
-            user = TraderDto(
-                number=msg.get('from'),
-                name=msg.get('from_name'),
-            )
-            return user
-        except Exception as e:
-            print("[extract_user] Error decoding message:", e)
-            return None
-
-    def post_processing(self, output: str, ad_dto: AdDto):
-        try:
-            # Step 1: Clean
-            for token in ("<|im_end|>", "<|im_start|>assistant",
-                          "<|im_start|>user", "<|im_start|>system"):
-                output = output.replace(token, "").strip()
-
-            # Step 2: Parse AI JSON
-            parsed_output = json.loads(output)
-            print("✅ post_processing: Valid JSON detected.")
-
-            # Step 3: Attach metadata
-            enriched_output = {
-                **parsed_output,  # unpack all AI-inferred fields
-                "messageId": ad_dto.messageId,
-                "groupId": ad_dto.groupId,
-                "image": ad_dto.image,
-                "video": ad_dto.video,
-            }
-
-            return enriched_output
-
-        except json.JSONDecodeError as e:
-            print(f"❌ post_processing: Invalid JSON – {e}\nMessage: {output}")
-            return False
-
+            self.load_data(ad)
