@@ -39,7 +39,7 @@ public partial class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
 
         modelBuilder.Entity<Ad>()
         .HasOne(ad => ad.Trader)
-        .WithMany()
+        .WithMany(t => t.Ads)
         .HasForeignKey(ad => ad.TraderId)
         .OnDelete(DeleteBehavior.Restrict);
 
@@ -48,6 +48,11 @@ public partial class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
         .WithMany()
         .HasForeignKey(ad => ad.GroupId)
         .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WhitelistedGroups>()
+            .HasOne(t => t.Trader)
+            .WithMany(t => t.WhitelistedGroups)
+            .HasForeignKey(t => t.TraderId);
 
 
         // 🔥 Seeding dummy Traders
@@ -61,7 +66,8 @@ public partial class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
             new Trader
             {
                 Id = 2,
-                Name = "demo acc",
+                Name = "ThomasFake",
+                Email = "demoaccwatches@gmail.com",
                 PhoneNumber = "31619348878"
             }
         );
@@ -72,6 +78,12 @@ public partial class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
             Id = "120363416829988594@g.us",
             GroupName = "Marktplaats",
             TraderId = 2,
+        },
+        new WhitelistedGroups 
+        {
+            Id = "120363420163603590@g.us",
+            GroupName = "CoolTraders Only! And god..",
+            TraderId = 2
         }
         );
 

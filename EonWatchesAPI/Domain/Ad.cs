@@ -26,8 +26,9 @@ public class Ad
     public string? Caliber { get; set; }
     public int? CaseDiameter { get; set; }
     public string? Other {  get; set; }
-    public bool Shipping {  get; set; }
-    
+    public bool? Shipping {  get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? TraderName { get; set; }
     
     
     public bool? IsAnSeller { get; set; }

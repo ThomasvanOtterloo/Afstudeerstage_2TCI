@@ -1,5 +1,6 @@
 using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
+using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Services.I_Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,12 +17,6 @@ public class AdController : ControllerBase
         _adService = adService;
     }
 
-    [HttpGet]
-    public async Task<IEnumerable<Ad>> GetAds()
-    {
-        return await _adService.GetAds();
-    }
-
     [HttpGet("{id}")]
     public async Task<Ad> GetAdById(int id)
     {
@@ -33,4 +28,20 @@ public class AdController : ControllerBase
     {
         return await _adService.CreateAd(ad);
     }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Ad>>> GetAds([FromQuery] AdFilterDto? filter)
+    {
+        try
+        {
+            var results = await _adService.GetAdsByFilter(filter);
+            return Ok(results);
+        }
+        catch (ArgumentException ex)
+        {
+            // returns a 400, with your ex.Message in the response body
+            return BadRequest(ex.Message);
+        }
+    }
+
 }

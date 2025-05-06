@@ -1,5 +1,7 @@
 using EonWatchesAPI.DbContext;
+using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Services.I_Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EonWatchesAPI.Controllers;
@@ -15,10 +17,30 @@ public class DistributeAdController : ControllerBase
         _distributeAdService = distributeAdService;
     }
     
-    [HttpPost]
-    public async Task<IActionResult> DistributeAd(Ad distributeAd)
+    [HttpPost("message")]
+    public async Task<IActionResult> SendMessage(SendMessageDto ad)
     {
-        return await _distributeAdService.DistributeAd(distributeAd);
+        try
+        {
+            await _distributeAdService.SendMessageToGroup(ad.BearerToken, ad.Text, ad.GroupIds);
+            return Ok();
+        }
+        catch (Exception ex) {
+            return BadRequest(ex.Message);
+
+        }
     }
 
+    [HttpPost("image")]
+    public async Task<IActionResult> SendMessageWithImage(SendImageCaptionDto ad)
+    {
+        try
+        {
+            await _distributeAdService.SendImageToGroup(ad.BearerToken, ad.Text, ad.Images[0], ad.GroupIds);
+            return Ok();
+        }
+        catch (Exception ex) {
+            return BadRequest(ex.Message);
+        }
+    }
 }

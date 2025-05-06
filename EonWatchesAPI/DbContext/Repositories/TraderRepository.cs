@@ -14,7 +14,11 @@ public class TraderRepository : ITraderRepository
 
     public async Task<IEnumerable<Trader>> GetTraders()
     {
-        return await _context.Traders.ToListAsync();
+        var traders = await _context.Traders
+            .Include(t => t.WhitelistedGroups)
+            .ToListAsync();
+
+        return traders;
     }
 
     public Task<Trader> CreateTrader(Trader trader)

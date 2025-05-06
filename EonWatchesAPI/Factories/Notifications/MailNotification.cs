@@ -18,14 +18,14 @@ public class MailNotification : INotification
         MailMessage mailMessage = new MailMessage
         {
             From = new MailAddress(_gmailSettings.email),
-            Subject = "Notification",
+            Subject = message.Subject,
             Body = message.Body,
             IsBodyHtml = true,
         };
-        mailMessage.To.Add(message.recipientEmail);
+        mailMessage.To.Add(message.RecipientEmail);
         
         Console.WriteLine("Using sender: " + _gmailSettings.email);
-        Console.WriteLine("Sending to: " + message.recipientEmail);
+        Console.WriteLine("Sending to: " + message.RecipientEmail);
         
         try
         {

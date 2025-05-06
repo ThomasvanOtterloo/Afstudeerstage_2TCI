@@ -31,7 +31,9 @@ namespace EonWatchesAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Archived")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("BatchCode")
                         .HasColumnType("nvarchar(max)");
@@ -69,10 +71,14 @@ namespace EonWatchesAPI.Migrations
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsAnSeller")
+                    b.Property<bool?>("IsAnSeller")
                         .HasColumnType("bit");
 
                     b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MessageId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Model")
@@ -87,6 +93,9 @@ namespace EonWatchesAPI.Migrations
                     b.Property<string>("PaymentMethod")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal?>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -94,11 +103,14 @@ namespace EonWatchesAPI.Migrations
                     b.Property<string>("ReferenceNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool?>("Shipping")
+                        .HasColumnType("bit");
+
                     b.Property<int>("TraderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TraderId1")
-                        .HasColumnType("int");
+                    b.Property<string>("TraderName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Video")
                         .HasColumnType("nvarchar(max)");
@@ -111,8 +123,6 @@ namespace EonWatchesAPI.Migrations
                     b.HasIndex("GroupId");
 
                     b.HasIndex("TraderId");
-
-                    b.HasIndex("TraderId1");
 
                     b.ToTable("Ads");
                 });
@@ -138,15 +148,27 @@ namespace EonWatchesAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PhoneNumber")
                         .IsUnique();
 
                     b.ToTable("Traders");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Thomas Van Otterloo",
+                            PhoneNumber = "31612231577"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "demoaccwatches@gmail.com",
+                            Name = "ThomasFake",
+                            PhoneNumber = "31619348878"
+                        });
                 });
 
             modelBuilder.Entity("EonWatchesAPI.DbContext.Trigger", b =>
@@ -195,6 +217,14 @@ namespace EonWatchesAPI.Migrations
                     b.HasIndex("TraderId");
 
                     b.ToTable("WhitelistedGroups");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "120363416829988594@g.us",
+                            GroupName = "Marktplaats",
+                            TraderId = 2
+                        });
                 });
 
             modelBuilder.Entity("EonWatchesAPI.DbContext.Ad", b =>
@@ -202,18 +232,14 @@ namespace EonWatchesAPI.Migrations
                     b.HasOne("EonWatchesAPI.DbContext.WhitelistedGroups", "Group")
                         .WithMany()
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EonWatchesAPI.DbContext.Trader", "Trader")
-                        .WithMany()
+                        .WithMany("Ads")
                         .HasForeignKey("TraderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("EonWatchesAPI.DbContext.Trader", null)
-                        .WithMany("Ads")
-                        .HasForeignKey("TraderId1");
 
                     b.Navigation("Group");
 

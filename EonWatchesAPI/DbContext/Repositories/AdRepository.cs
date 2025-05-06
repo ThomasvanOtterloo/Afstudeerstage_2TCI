@@ -1,4 +1,5 @@
 using EonWatchesAPI.DbContext.I_Repositories;
+using EonWatchesAPI.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace EonWatchesAPI.DbContext;
@@ -28,5 +29,24 @@ public class AdRepository : IAdRepository
         await _context.SaveChangesAsync();
         return ad;
     }
-    
+
+    public async Task<IEnumerable<Ad>> GetAdsFiltered(string? brand, string? model, string? referenceNumber)
+    {
+        IQueryable<Ad> q = _context.Ads.AsQueryable();
+
+        // Apply each filter only if it was provided
+        if (!string.IsNullOrWhiteSpace(brand))
+            q = q.Where(ad => ad.Brand == brand);
+
+        if (!string.IsNullOrWhiteSpace(model))
+            q = q.Where(ad => ad.Model == model);
+
+        if (!string.IsNullOrWhiteSpace(referenceNumber))
+            q = q.Where(ad => ad.ReferenceNumber == referenceNumber);
+
+        // Execute and return
+        return await q.ToListAsync();
+    }
+
+
 }

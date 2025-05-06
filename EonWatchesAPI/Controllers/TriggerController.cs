@@ -1,4 +1,5 @@
 using EonWatchesAPI.DbContext;
+using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Factories.Notifications;
 using EonWatchesAPI.Services.I_Services;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,7 @@ public class TriggerController
     }
     
     [HttpPost]
-    public async Task<Trigger> CreateTrigger(Trigger trigger)
+    public async Task<Trigger> CreateTrigger(TriggerCreateDto trigger)
     {
         return await _triggerService.CreateTrigger(trigger);
     }

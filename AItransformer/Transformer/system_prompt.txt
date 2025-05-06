@@ -7,10 +7,11 @@
     ✅ Each distinct watch in a sale must have its own JSON object within a wrapper like [{object1}, {object2}], etc.
     ✅ If the message contains multiple watches, return multiple JSON objects.
 
-    ⚠️ Do not guess, infer, or fill in fields based on prior knowledge, context, or assumptions.
-    If a value is not visibly present in the message, do not include the field at all.
+    ⚠️ If you see abbreviations of brands, like "PP" for Patek Philippe, Write the full name. no abbreviations.
+    ⚠️ If a value is not visibly present in the message, do not include the field at all. unless it is the brand. You are allowed to make your best guess to what brand the watch reference number belongs to. example: ReferenceNumber: "126610LN" = Brand: "Rolex". But do not guess anything else. Only the brand.
     ⚠️ Do not output anything else but the JSON. Do NOT explain or asking for validation of your output.
     Only the JSON matters, unless the input does not imply of someone actively trying to buy or sell a watch return 'Null'.
+    ⚠️ When multiple currencies are mentioned, always use the first one.
 
     Think of your job like this:
         You see words (like “Jubilee”, “HKD”, “N3/25Y”)
@@ -19,19 +20,18 @@
 
     ### Example Clarification
     If the message says:
-    126610LN $18,000 wire
+    126610LN 310000Hkd/39900USDT
 
     Then your job is to return:
-      "ReferenceNumber": "126610LN",
-      "Price": 18000,
-      "Currency": "USD",
-      "PaymentMethod": "wire" ()
-
-    Do NOT add:
-        "Brand": "Rolex" ❌
-        "Model": "Submariner" ❌
-        "entity" null ❌ (Never leave Key-values where value is null)
-        Even if you're certain of it — those words were not in the message.
+    [
+      {
+        "Brand": "Rolex",
+        "Model": "Submariner",
+        "ReferenceNumber": "126610LN",
+        "Price": 310000,
+        "Currency": "HKD"
+      }
+    ]
 
     ### Example when to return NULL.
     If the message says:

@@ -4,9 +4,21 @@ using EonWatchesAPI.Factories.Notifications;
 using EonWatchesAPI.Services.I_Services;
 using EonWatchesAPI.Services.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1) Register a CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev", policy =>
+    {
+        policy
+           .AllowAnyOrigin()
+           .AllowAnyHeader()
+           .AllowAnyMethod();
+    });
+});
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -17,6 +29,13 @@ builder.Services.AddControllers();
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile("appsettings.Local.json", optional: false, reloadOnChange: true);
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true; // Optional: for better readability
+    });
 
 builder.Services.Configure<GmailSettings>(
     builder.Configuration.GetSection(GmailSettings.GmailOptionsKey));
@@ -48,7 +67,15 @@ builder.Services.AddScoped<INotification, MailNotification>();
 builder.Services.AddScoped<ITriggerService, TriggerService>();
 
 
+builder.Logging
+       .ClearProviders()
+       .AddConsole()
+       .AddDebug();
+
+
+
 var app = builder.Build();
+app.UseCors("AllowAngularDev");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -58,7 +85,6 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.MapPost("")
-
 
 app.UseHttpsRedirection();
 app.MapControllers();
