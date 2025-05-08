@@ -35,7 +35,7 @@ public class AdService : IAdService
 
     public Task<IEnumerable<Ad>> GetAdsByFilter(AdFilterDto filter)
     {
-        var ads = _adRepository.GetAdsFiltered(filter.Brand, filter.Model, filter.ReferenceNumber);
+        var ads = _adRepository.GetAdsFiltered(filter.Brand, filter.Model, filter.ReferenceNumber, filter.DaysAgo);
 
         return ads;
     }

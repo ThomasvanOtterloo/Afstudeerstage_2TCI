@@ -7,6 +7,7 @@ namespace EonWatchesAPI.Dtos
         public string? Brand { get; set; }
         public string? Model { get; set; }
         public string? ReferenceNumber { get; set; }
+        public int? DaysAgo { get; set; }
 
         //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         //{
