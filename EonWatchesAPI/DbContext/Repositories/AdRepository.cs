@@ -30,7 +30,7 @@ public class AdRepository : IAdRepository
         return ad;
     }
 
-    public async Task<IEnumerable<Ad>> GetAdsFiltered(string? brand, string? model, string? referenceNumber)
+    public async Task<IEnumerable<Ad>> GetAdsFiltered(string? brand, string? model, string? referenceNumber, int? daysAgo)
     {
         IQueryable<Ad> q = _context.Ads.AsQueryable();
 
@@ -43,6 +43,13 @@ public class AdRepository : IAdRepository
 
         if (!string.IsNullOrWhiteSpace(referenceNumber))
             q = q.Where(ad => ad.ReferenceNumber == referenceNumber);
+
+        if (daysAgo.HasValue)
+        {
+            // use UtcNow or Now depending on how you store your dates
+            var cutoff = DateTime.UtcNow.AddDays(-daysAgo.Value);
+            q = q.Where(ad => ad.CreatedAt >= cutoff);
+        }
 
         // Execute and return
         return await q.ToListAsync();

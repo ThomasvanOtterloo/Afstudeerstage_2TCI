@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using System.Diagnostics.Eventing.Reader;
+using static System.Net.WebRequestMethods;
 
 namespace EonWatchesAPI.Services.Services;
 
@@ -63,8 +64,16 @@ public class DistributeAdService : IDistributeAdService
                 media = base64Image
             });
 
+
             var response = await client.PostAsync(request);
-            Console.WriteLine(response.Content);
+            // Instead of letting RestSharp throw, inspect the status yourself:
+            if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException(
+                  $"Server returned {(int)response.StatusCode} {response.StatusDescription}");
+            }
+ 
+
             await Task.Delay(5000);
         }
     }

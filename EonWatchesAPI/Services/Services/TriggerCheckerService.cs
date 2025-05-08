@@ -51,7 +51,7 @@ public class TriggerCheckerService : BackgroundService
 
                 if (newAds.Any())
                 {
-                    _logger.LogInformation("🆕 Found {Count} new ad(s)", newAds.Count);
+                    //_logger.LogInformation("🆕 Found {Count} new ad(s)", newAds.Count);
 
                     foreach (var ad in newAds)
                     {
@@ -72,9 +72,9 @@ public class TriggerCheckerService : BackgroundService
                         {
                             foreach (var trig in matches)
                             {
-                                _logger.LogInformation(
-                                  "🔔 Ad #{AdId} matches Trigger #{TriggerId} ({Brand}/{Model}/{Ref})",
-                                  ad.Id, trig.Id, trig.Brand, trig.Model, trig.ReferenceNumber);
+                                //_logger.LogInformation(
+                                //  "🔔 Ad #{AdId} matches Trigger #{TriggerId} ({Brand}/{Model}/{Ref})",
+                                //  ad.Id, trig.Id, trig.Brand, trig.Model, trig.ReferenceNumber);
 
                                 var emailInfo = new SendEmailRequest(
                                     Subject: "Your Watch Trigger Fired!",

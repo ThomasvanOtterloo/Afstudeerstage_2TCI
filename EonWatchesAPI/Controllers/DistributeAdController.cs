@@ -3,6 +3,8 @@ using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Services.I_Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
+
 
 namespace EonWatchesAPI.Controllers;
 
@@ -36,11 +38,30 @@ public class DistributeAdController : ControllerBase
     {
         try
         {
-            await _distributeAdService.SendImageToGroup(ad.BearerToken, ad.Text, ad.Images[0], ad.GroupIds);
+            // 1) Fetch the image bytes from your localhost URL
+            using var http = new HttpClient();
+            byte[] bytes = await http.GetByteArrayAsync(ad.Images[0]);
+
+            // 2) Base64-encode
+            var b64 = Convert.ToBase64String(bytes);
+
+            // 3) Build the data-URI
+            var dataUri = $"data:image/jpeg;base64,{b64}";
+
+            // 4) Pass the data-URI to your service
+            await _distributeAdService.SendImageToGroup(
+                ad.BearerToken,
+                ad.Text,
+                dataUri,
+                ad.GroupIds
+            );
+
             return Ok();
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             return BadRequest(ex.Message);
         }
     }
+
 }
