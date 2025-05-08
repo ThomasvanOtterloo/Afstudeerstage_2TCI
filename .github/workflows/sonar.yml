@@ -26,7 +26,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet-sonarscanner begin /k:"Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          dotnet-sonarscanner begin /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       - name: Build
         run: dotnet build
