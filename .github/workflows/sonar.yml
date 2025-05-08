@@ -1,11 +1,7 @@
-name: SonarCloud
+name: Build and analyze
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened]
     branches:
       - main
 
@@ -15,20 +11,27 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Install SonarCloud Scanner
-      run: dotnet tool install --global dotnet-sonarscanner
+      - name: Install SonarCloud scanner
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
 
-    - name: Build and analyze
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        dotnet-sonarscanner begin /k:"Afstudeerstage_2TCI" /o:"<jouw_organization>" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-        dotnet build
-        dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      - name: Begin SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet-sonarscanner begin /k:"Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Build
+        run: dotnet build
+
+      - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
