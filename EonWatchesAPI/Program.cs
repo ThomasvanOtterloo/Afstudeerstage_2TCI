@@ -59,12 +59,14 @@ builder.Services.AddScoped<ITraderRepository, TraderRepository>();
 builder.Services.AddScoped<IDistributeAdRepository, DistributeAdRepository>();
 builder.Services.AddScoped<ITriggerRepository, TriggerRepository>();
 
+
 // services
 builder.Services.AddScoped<IAdService, AdService>();
 builder.Services.AddScoped<ITraderService, TraderService>();
 builder.Services.AddScoped<IDistributeAdService, DistributeAdService>();
 builder.Services.AddScoped<INotification, MailNotification>();
 builder.Services.AddScoped<ITriggerService, TriggerService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 
 builder.Logging

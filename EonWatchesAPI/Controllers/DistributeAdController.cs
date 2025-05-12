@@ -38,17 +38,14 @@ public class DistributeAdController : ControllerBase
     {
         try
         {
-            // 1) Fetch the image bytes from your localhost URL
-            using var http = new HttpClient();
-            byte[] bytes = await http.GetByteArrayAsync(ad.Images[0]);
-
-            // 2) Base64-encode
+            using var ms = new MemoryStream();
+            await ad.Image.CopyToAsync(ms);
+            var bytes = ms.ToArray();
             var b64 = Convert.ToBase64String(bytes);
 
-            // 3) Build the data-URI
-            var dataUri = $"data:image/jpeg;base64,{b64}";
+            var mimeType = ad.Image.ContentType; // Optional
+            var dataUri = $"data:{mimeType};base64,{b64}";
 
-            // 4) Pass the data-URI to your service
             await _distributeAdService.SendImageToGroup(
                 ad.BearerToken,
                 ad.Text,
@@ -60,6 +57,7 @@ public class DistributeAdController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine("? Error in DistributeAdController.SendMessageWithImage");
             return BadRequest(ex.Message);
         }
     }

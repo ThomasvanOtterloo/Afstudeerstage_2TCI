@@ -15,7 +15,7 @@ public class AdRepository : IAdRepository
     
     public async Task<IEnumerable<Ad>> GetAds()
     {
-        return await _context.Ads.ToListAsync();
+        return await _context.Ads.OrderBy(a => a.CreatedAt).ToListAsync();
     }
     
     public async Task<Ad> GetAdById(int id)
@@ -51,8 +51,9 @@ public class AdRepository : IAdRepository
             q = q.Where(ad => ad.CreatedAt >= cutoff);
         }
 
+
         // Execute and return
-        return await q.ToListAsync();
+        return await q.OrderByDescending(a => a.CreatedAt).ToListAsync();
     }
 
 
