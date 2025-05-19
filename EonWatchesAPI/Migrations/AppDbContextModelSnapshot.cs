@@ -185,9 +185,6 @@ namespace EonWatchesAPI.Migrations
                     b.Property<string>("Model")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("Notified")
-                        .HasColumnType("bit");
-
                     b.Property<string>("ReferenceNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -223,6 +220,12 @@ namespace EonWatchesAPI.Migrations
                         {
                             Id = "120363416829988594@g.us",
                             GroupName = "Marktplaats",
+                            TraderId = 2
+                        },
+                        new
+                        {
+                            Id = "120363420163603590@g.us",
+                            GroupName = "CoolTraders Only! And god..",
                             TraderId = 2
                         });
                 });

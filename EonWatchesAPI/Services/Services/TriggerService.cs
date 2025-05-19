@@ -29,6 +29,11 @@ public class TriggerService : ITriggerService
         return _triggerRepository.GetTriggerById(id);
     }
 
+    public Task<List<Trigger>> GetTriggerListByUserId(int id)
+    {
+        return _triggerRepository.GetTriggerListByUserId(id);
+    }
+
     public Task<Trigger> CreateTrigger(TriggerCreateDto dto)
     {
 
@@ -42,8 +47,9 @@ public class TriggerService : ITriggerService
 
         return _triggerRepository.CreateTrigger(trigger);
     }
-    
-    
-    
-    
+
+    public Task<bool> DeleteTrigger(int id)
+    {
+        return _triggerRepository.DeleteTrigger(id);
+    }
 }
