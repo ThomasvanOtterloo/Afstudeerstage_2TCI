@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EonWatchesAPI.Factories.SocialPlatforms;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace EonWatchesAPI.Dtos
@@ -8,6 +9,11 @@ namespace EonWatchesAPI.Dtos
         [FromForm]
         [Required]
         public string BearerToken { get; set; }
+
+        [FromForm]
+        [Required]
+        public ConnectionType[] ConnectionType { get; set; }
+
         [FromForm]
         public string? Text { get; set; }
         [Required]

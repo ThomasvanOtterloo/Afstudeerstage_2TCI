@@ -1,7 +1,7 @@
 import pika
 import json
 
-def send_test_message(data):
+def send_messageQ(data):
     connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
     channel = connection.channel()
 

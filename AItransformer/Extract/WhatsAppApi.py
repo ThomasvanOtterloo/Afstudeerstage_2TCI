@@ -3,8 +3,10 @@ import threading
 import requests
 from flask import Flask, request, jsonify
 
+from Extract.ConnectionStrategy import ConnectionStrategy
 
-class WhatsAppApi:
+
+class WhatsAppApi(ConnectionStrategy):
     def __init__(self):
         self.app = Flask(__name__)
         self.app.add_url_rule("/webhook", "webhook_listener", self.webhook, methods=["POST"])

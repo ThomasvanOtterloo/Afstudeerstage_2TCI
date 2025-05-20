@@ -17,7 +17,7 @@ namespace EonWatchesAPI.Controllers
             _groupService = groupService;
         }
 
-        [HttpGet]
+        [HttpGet("GetAccountGroups")]
         public async Task<ActionResult<List<GroupDto>>> GetUserGroups(string token)
         {
             try
@@ -33,20 +33,45 @@ namespace EonWatchesAPI.Controllers
             }
         }
 
-        [HttpPost("WhitelistGroups")]
-        public async Task<IActionResult> WhitelistGroupId(string groupId)
+        [HttpGet("GetWhitelistedGroups")]
+        public async Task<ActionResult<List<GroupDto>>> GetWhitelistedGroups(int traderId)
         {
-
-
-            return Ok();
+            try
+            {
+                var result = await _groupService.GetWhitelistedGroups(traderId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpPost("DeWhitelistGroups")]
-        public async Task<IActionResult> DeWhitelistGroupId(string groupId)
+        [HttpPost("WhitelistGroups")]
+        public async Task<IActionResult> WhitelistGroupId(int traderId, string groupId, string groupName)
         {
+            try
+            {
+                await _groupService.WhitelistGroup(traderId, groupId, groupName);
+                return Ok();
+            }
+            catch (Exception ex) {
+                return BadRequest(ex.Message);
+            }
+        }
 
-
-            return Ok();
+        [HttpDelete("DeWhitelistGroups")]
+        public async Task<IActionResult> DeWhitelistGroupId(string traderId, string groupId)
+        {
+            try
+            {
+                await _groupService.DeleteWhitelistedGroup(traderId, groupId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 

@@ -5,7 +5,7 @@ from Extract.WhatsAppApi import WhatsAppApi
 from Load.LoadDataController import LoadDataController
 from Load.MicrosoftSQLServer import MicrosoftSQLServer
 from Queue.Queue import setup_queues
-from Extract.QueueService import send_test_message
+from Extract.QueueService import send_messageQ
 import pyodbc
 
 from Transformer.BaseTransformerModel import BaseTransformerModel

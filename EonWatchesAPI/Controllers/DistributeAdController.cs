@@ -24,7 +24,7 @@ public class DistributeAdController : ControllerBase
     {
         try
         {
-            await _distributeAdService.SendMessageToGroup(ad.BearerToken, ad.Text, ad.GroupIds);
+            await _distributeAdService.SendMessageToGroup(ad.ConnectionType, ad.BearerToken, ad.Text, ad.GroupIds);
             return Ok();
         }
         catch (Exception ex) {
@@ -47,6 +47,7 @@ public class DistributeAdController : ControllerBase
             var dataUri = $"data:{mimeType};base64,{b64}";
 
             await _distributeAdService.SendImageToGroup(
+                ad.ConnectionType,
                 ad.BearerToken,
                 ad.Text,
                 dataUri,

@@ -1,6 +1,10 @@
+using EonWatchesAPI.Connections;
 using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
+using EonWatchesAPI.DbContext.Repositories;
+using EonWatchesAPI.Factories;
 using EonWatchesAPI.Factories.Notifications;
+using EonWatchesAPI.Factories.SocialPlatforms;
 using EonWatchesAPI.Services.I_Services;
 using EonWatchesAPI.Services.Services;
 using Microsoft.EntityFrameworkCore;
@@ -23,8 +27,14 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
+builder.Services.AddSwaggerGen(c =>
+    {
+        c.UseInlineDefinitionsForEnums();
+    });
+builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -58,7 +68,7 @@ builder.Services.AddScoped<IAdRepository, AdRepository>();
 builder.Services.AddScoped<ITraderRepository, TraderRepository>();
 builder.Services.AddScoped<IDistributeAdRepository, DistributeAdRepository>();
 builder.Services.AddScoped<ITriggerRepository, TriggerRepository>();
-
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 
 // services
 builder.Services.AddScoped<IAdService, AdService>();
@@ -67,6 +77,18 @@ builder.Services.AddScoped<IDistributeAdService, DistributeAdService>();
 builder.Services.AddScoped<INotification, MailNotification>();
 builder.Services.AddScoped<ITriggerService, TriggerService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<ISocialConnection, WhapiConnection>();
+
+// strategies
+builder.Services.AddSingleton<WhapiConnection>();
+
+builder.Services.AddSingleton<Dictionary<ConnectionType, ISocialConnection>>(sp => new()
+{
+    {
+        ConnectionType.WhatsApp, sp.GetRequiredService<WhapiConnection>()
+    }
+    // future other strategies (connections) for ad distribution.
+});
 
 
 builder.Logging

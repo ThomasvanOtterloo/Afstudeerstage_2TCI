@@ -1,4 +1,7 @@
-﻿using EonWatchesAPI.Dtos;
+﻿using EonWatchesAPI.DbContext;
+using EonWatchesAPI.DbContext.I_Repositories;
+using EonWatchesAPI.Dtos;
+using EonWatchesAPI.Factories;
 using EonWatchesAPI.Services.I_Services;
 using RestSharp;
 using System.Text.Json;
@@ -9,39 +12,38 @@ namespace EonWatchesAPI.Services.Services
 
     public class GroupService : IGroupService
     {
-        private readonly string groupUrl = "https://gate.whapi.cloud/groups?count=100";
+        ISocialConnection _socialConnection;
+        IGroupRepository _groupRepository;
 
+        public GroupService(ISocialConnection socialConnection, IGroupRepository groupRepository) {
+            _socialConnection = socialConnection;
+            _groupRepository = groupRepository;
+        
+        }
 
-        public GroupService() { }
-
-        public async Task<List<GroupDto>> GetGroups(string bearerToken)
+        public Task DeleteWhitelistedGroup(string bearerToken, string groupId)
         {
-            var options = new RestClientOptions(groupUrl);
-            var client = new RestClient(options);
-            var request = new RestRequest("");
-            request.AddHeader("accept", "application/json");
-            request.AddHeader("authorization", $"Bearer {bearerToken}");
+            // get TraderId out of token data.
+            return _groupRepository.DeleteWhitelistedGroup(2, groupId);   
+        }
 
-            var response = await client.GetAsync(request);
-
-            if (!response.IsSuccessful || string.IsNullOrWhiteSpace(response.Content))
-                return new List<GroupDto>();
-
-            using var doc = JsonDocument.Parse(response.Content);
-            var groupsElement = doc.RootElement.GetProperty("groups");
-
-            var result = new List<GroupDto>();
-
-            foreach (var group in groupsElement.EnumerateArray())
-            {
-                result.Add(new GroupDto
-                {
-                    Id = group.GetProperty("id").GetString(),
-                    Name = group.GetProperty("name").GetString()
-                });
-            }
+        public Task<List<GroupDto>> GetGroups(string bearerToken)
+        {
+            // requests a list of all groups connected to the whatsapp account through Whapi.com
+            var result = _socialConnection.GetGroupsByUser(bearerToken);
             return result;
+        }
 
+        public Task<List<WhitelistedGroups>> GetWhitelistedGroups(int traderId)
+        {
+            return _groupRepository.GetWhitelistedGroups(traderId);
+        }
+
+
+        public Task WhitelistGroup(int traderId, string groupId, string groupName)
+        {
+            // get traderId from token data
+            return _groupRepository.WhitelistGroup(2, groupId, groupName);
         }
     }
 }

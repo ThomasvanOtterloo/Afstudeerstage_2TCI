@@ -8,7 +8,6 @@ class MessageAuthorizationService:
 
     def authorize_message(self, message_id, user_id):
 
-
         return True
 
     def is_authorized(self, user, message):
