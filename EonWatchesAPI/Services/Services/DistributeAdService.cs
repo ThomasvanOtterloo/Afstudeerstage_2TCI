@@ -2,6 +2,8 @@ using Azure.Core;
 using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
 using EonWatchesAPI.Dtos;
+using EonWatchesAPI.Factories.SocialPlatforms;
+using EonWatchesAPI.Factories;
 using EonWatchesAPI.Services.I_Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,69 +15,33 @@ namespace EonWatchesAPI.Services.Services;
 
 public class DistributeAdService : IDistributeAdService
 {
-    private readonly IDistributeAdRepository _distributeAdRepository;
-    private readonly string textUrl = "https://gate.whapi.cloud/messages/text";
-    private readonly string imageUrl = "https://gate.whapi.cloud/messages/image";
-    public DistributeAdService(IDistributeAdRepository distributeAdRepository)
+    private readonly Dictionary<ConnectionType, ISocialConnection> _strategies;
+
+    public DistributeAdService(Dictionary<ConnectionType, ISocialConnection> strategies)
     {
-        _distributeAdRepository = distributeAdRepository;
+        _strategies = strategies;
     }
 
-    public async Task SendMessageToGroup(string bearerToken, string text, List<string> groupId)
+    public async Task SendMessageToGroup(ConnectionType[] connections, string token, string text, List<string> groupIds)
     {
-        var options = new RestClientOptions(textUrl);
-        var client = new RestClient(options);
-        
-        foreach (var id in groupId)
+        foreach (var type in connections)
         {
-            var request = new RestRequest();
+            if (!_strategies.TryGetValue(type, out var strategy))
+                throw new NotSupportedException($"Unsupported connection type: {type}");
 
-            request.AddHeader("accept", "application/json");
-            request.AddHeader("authorization", $"Bearer {bearerToken}");
-            request.AddJsonBody(new
-            {
-                typing_time =3,
-                to = id,
-                body = text
-            });
-
-            var response = await client.PostAsync(request);
-            Console.WriteLine(response.Content);
-            await Task.Delay(5000);
-
+            await strategy.SendTextToGroups(token, text, groupIds);
         }
     }
 
-    public async Task SendImageToGroup(string bearerToken, string caption, string base64Image, List<string> groupId)
+    public async Task SendImageToGroup(ConnectionType[] connections, string token, string caption, string base64, List<string> groupIds)
     {
-        var options = new RestClientOptions(imageUrl);
-        var client = new RestClient(options);
-        
-        foreach (var id in groupId)
+        foreach (var type in connections)
         {
-            var request = new RestRequest();
-            request.AddHeader("accept", "application/json");
-            request.AddHeader("authorization", $"Bearer {bearerToken}");
-            request.AddJsonBody(new
-            {
-                typing_time =3,
-                to = id,
-                caption = caption,
-                media = base64Image
-            });
+            if (!_strategies.TryGetValue(type, out var strategy))
+                throw new NotSupportedException($"Unsupported connection type: {type}");
 
-
-            var response = await client.PostAsync(request);
-            // Instead of letting RestSharp throw, inspect the status yourself:
-            if (!response.IsSuccessful)
-            {
-                throw new HttpRequestException(
-                  $"Server returned {(int)response.StatusCode} {response.StatusDescription}");
-            }
- 
-
-            await Task.Delay(5000);
+            await strategy.SendImageToGroups(token, caption, base64, groupIds);
         }
     }
-
 }
+

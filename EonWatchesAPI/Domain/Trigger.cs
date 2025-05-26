@@ -11,5 +11,4 @@ public class Trigger
     public string? Brand { get; set; }
     public string? Model { get; set; }
     public string? ReferenceNumber { get; set; }
-    public bool? Notified { get; set; } = false;
 }

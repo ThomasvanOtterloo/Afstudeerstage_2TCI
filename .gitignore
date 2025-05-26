@@ -492,3 +492,5 @@ Scraper/
 AItransformer/unsloth_compiled_cache/
 
 EonWatchesAPI/Migrations/
+
+AItransformer/Model/ref2brand/model.safetensors

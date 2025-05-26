@@ -19,7 +19,14 @@ public class TriggerRepository : ITriggerRepository
 
     public Task<Trigger> GetTriggerById(int id)
     {
-        throw new NotImplementedException();
+        return _db.Triggers.ElementAtAsync(id);
+    }
+
+    public async Task<List<Trigger>> GetTriggerListByUserId(int id)
+    {
+        return await _db.Triggers
+                        .Where(t => t.TraderId == id)
+                        .ToListAsync();
     }
 
     public Task<Trigger> CreateTrigger(Trigger trigger)
@@ -27,5 +34,17 @@ public class TriggerRepository : ITriggerRepository
         _db.Triggers.Add(trigger);
         _db.SaveChanges();
         return Task.FromResult(trigger);
+    }
+
+    public async Task<bool> DeleteTrigger(int id)
+    {
+        var trigger = await _db.Triggers.FindAsync(id);
+        if (trigger == null) return false;
+
+        _db.Triggers.Remove(trigger);
+        await _db.SaveChangesAsync();
+        return true;
+
+
     }
 }

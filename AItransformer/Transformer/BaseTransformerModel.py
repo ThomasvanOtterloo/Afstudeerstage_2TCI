@@ -54,4 +54,5 @@ class BaseTransformerModel(ITransformer):
         # 7. Strip prompt tokens so only the assistant reply remains
         generated_ids = output[0][model_inputs.input_ids.shape[1]:]
         content = self.tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
+        print("BaseTransformerModel: \n", content)
         return content

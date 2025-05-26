@@ -39,8 +39,7 @@ public class MailNotification : INotification
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            Console.WriteLine($"[Email Error] SMTP issue: {e.Message}");
         }
        
     }

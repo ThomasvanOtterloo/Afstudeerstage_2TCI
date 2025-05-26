@@ -39,6 +39,7 @@ public class TriggerCheckerService : BackgroundService
 
                 var now = DateTime.UtcNow;
 
+                //todo, make it so its checking from multiple sources?
                 // load all your triggers once per loop
                 var triggers = await db.Triggers
                     .Include(t => t.Trader)
@@ -49,10 +50,10 @@ public class TriggerCheckerService : BackgroundService
                     .Where(ad => ad.CreatedAt > _lastCheck)
                     .ToListAsync(stoppingToken);
 
+
+                // todo refactor
                 if (newAds.Any())
                 {
-                    //_logger.LogInformation("🆕 Found {Count} new ad(s)", newAds.Count);
-
                     foreach (var ad in newAds)
                     {
                         // find any triggers whose Brand, Model or ReferenceNumber
@@ -67,6 +68,7 @@ public class TriggerCheckerService : BackgroundService
                                    && ad.ReferenceNumber?.Contains(t.ReferenceNumber, StringComparison.OrdinalIgnoreCase) == true)
                             )
                             .ToList();
+
 
                         if (matches.Any())
                         {

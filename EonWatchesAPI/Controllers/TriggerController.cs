@@ -2,13 +2,14 @@ using EonWatchesAPI.DbContext;
 using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Factories.Notifications;
 using EonWatchesAPI.Services.I_Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EonWatchesAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class TriggerController
+public class TriggerController : ControllerBase
 {
     private readonly ITriggerService _triggerService;
     private readonly INotification _notification;
@@ -30,7 +31,13 @@ public class TriggerController
     {
         return await _triggerService.GetTriggerById(id);
     }
-    
+
+    [HttpGet("/TriggerList/{userId}")]
+    public async Task<List<Trigger>> GetTriggerListByUserId(int userId)
+    {
+        return await _triggerService.GetTriggerListByUserId(userId);
+    }
+
     [HttpPost]
     public async Task<Trigger> CreateTrigger(TriggerCreateDto trigger)
     {
@@ -52,4 +59,37 @@ public class TriggerController
             throw;
         }
     }
+
+    // DELETE /Trigger/{id}
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteTrigger(int id)
+    {
+        try
+        {
+            // Let the service return a bool indicating whether it actually deleted something
+            var deleted = await _triggerService.DeleteTrigger(id);
+            if (!deleted)
+            {
+                // 404 if that ID wasn't in the database
+                return NotFound(new { message = $"No trigger found with ID {id}." });
+            }
+
+            // 204 No Content is standard for a successful DELETE
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception details
+            Console.Error.WriteLine($"Error deleting trigger {id}: {ex}");
+
+            // Return a generic 500 with no sensitive exception details
+            return StatusCode(500, new { message = "An unexpected error occurred." });
+        }
+    }
+
+
+
+
+
+
 }

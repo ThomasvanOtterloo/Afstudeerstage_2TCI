@@ -120,7 +120,7 @@ class MessageProcessingService:
             if img.width > max_width or img.height > max_height:
                 img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
                 img.save(input_path, format="JPEG", quality=90)
-                print(f"✅ Resized image to max 720p: {input_path}")
+                # print(f"✅ Resized image to max 720p: {input_path}")
             else:
                 print(f"ℹ️ Image is already 720p or smaller: {input_path}")
             return img
