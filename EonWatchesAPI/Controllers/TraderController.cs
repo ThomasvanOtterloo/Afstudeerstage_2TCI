@@ -1,4 +1,5 @@
 using EonWatchesAPI.DbContext;
+using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Services.I_Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,7 +29,7 @@ public class TraderController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<Trader> CreateTrader(Trader trader)
+    public async Task<Trader> CreateTrader(TraderDto trader)
     {
         return await _traderService.CreateTrader(trader);
     }

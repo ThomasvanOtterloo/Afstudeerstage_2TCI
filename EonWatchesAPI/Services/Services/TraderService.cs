@@ -1,5 +1,7 @@
 using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
+using EonWatchesAPI.Dtos;
+using EonWatchesAPI.Dtos.MappingExtensions;
 using EonWatchesAPI.Services.I_Services;
 
 namespace EonWatchesAPI.Services.Services;
@@ -18,13 +20,15 @@ public class TraderService : ITraderService
         return _traderRepository.GetTraders();
     }
 
-    public async Task<Trader> CreateTrader(Trader trader)
+    public async Task<Trader> CreateTrader(TraderDto dto)
     {
+        var trader = dto.ToEntity();
         return await _traderRepository.CreateTrader(trader);
     }
     
-    public async Task<Trader> UpdateTrader(Trader trader)
+    public async Task<Trader> UpdateTrader(TraderDto dto)
     {
+        var trader = dto.ToEntity();
         return await _traderRepository.UpdateTrader(trader);
     }
     

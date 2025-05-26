@@ -24,7 +24,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<Ad> CreateAd(Ad ad)
+    public async Task<Ad> CreateAd(CreateAdDto ad)
     {
         return await _adService.CreateAd(ad);
     }

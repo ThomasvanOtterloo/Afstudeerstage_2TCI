@@ -65,7 +65,6 @@ namespace EonWatchesAPI.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("GroupId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Image")
@@ -78,7 +77,6 @@ namespace EonWatchesAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MessageId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Model")
@@ -235,8 +233,7 @@ namespace EonWatchesAPI.Migrations
                     b.HasOne("EonWatchesAPI.DbContext.WhitelistedGroups", "Group")
                         .WithMany()
                         .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("EonWatchesAPI.DbContext.Trader", "Trader")
                         .WithMany("Ads")

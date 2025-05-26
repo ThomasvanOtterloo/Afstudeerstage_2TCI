@@ -1,6 +1,7 @@
 using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
 using EonWatchesAPI.Dtos;
+using EonWatchesAPI.Dtos.MappingExtensions;
 using EonWatchesAPI.Services.I_Services;
 
 namespace EonWatchesAPI.Services.Services;
@@ -28,8 +29,9 @@ public class AdService : IAdService
         return _adRepository.GetAdById(id);
     }
 
-    public Task<Ad> CreateAd(Ad ad)
+    public Task<Ad> CreateAd(CreateAdDto dto)
     {
+        var ad = dto.ToEntity();
         return _adRepository.CreateAd(ad);
     }
 
