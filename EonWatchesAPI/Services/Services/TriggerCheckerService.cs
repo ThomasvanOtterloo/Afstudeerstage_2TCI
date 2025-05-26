@@ -78,18 +78,18 @@ public class TriggerCheckerService : BackgroundService
                                 //  "🔔 Ad #{AdId} matches Trigger #{TriggerId} ({Brand}/{Model}/{Ref})",
                                 //  ad.Id, trig.Id, trig.Brand, trig.Model, trig.ReferenceNumber);
 
-                                //var emailInfo = new SendEmailRequest(
-                                //    Subject: "Your Watch Trigger Fired!",
-                                //    Body: $"Hello {trig.Trader.Name},\n\n" +
-                                //                    $"An ad (# {ad.Id}) for “{ad.Brand} {ad.Model}” " +
-                                //                    $"with ref \"{ad.ReferenceNumber}\" just appeared " +
-                                //                    $"that matches your trigger settings.\n\n" +
-                                //                    $"Message {ad.TraderName} now at {ad.PhoneNumber} to see whats up! \n\n" +
-                                //                    "– EonWatches Bot",
-                                //    RecipientEmail: trig.Trader.Email
-                                //);
-                                //// fire your notification
-                                //notifier.SendNotification(emailInfo);
+                                var emailInfo = new SendEmailRequest(
+                                    Subject: "Your Watch Trigger Fired!",
+                                    Body: $"Hello {trig.Trader.Name},\n\n" +
+                                                    $"An ad (# {ad.Id}) for “{ad.Brand} {ad.Model}” " +
+                                                    $"with ref \"{ad.ReferenceNumber}\" just appeared " +
+                                                    $"that matches your trigger settings.\n\n" +
+                                                    $"Message {ad.TraderName} now at {ad.PhoneNumber} to see whats up! \n\n" +
+                                                    "– EonWatches Bot",
+                                    RecipientEmail: trig.Trader.Email
+                                );
+                                // fire your notification
+                                notifier.SendNotification(emailInfo);
                             }
                         }
                     }

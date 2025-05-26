@@ -9,21 +9,21 @@ from Extract.QueueService import send_messageQ
 import pyodbc
 
 from Transformer.BaseTransformerModel import BaseTransformerModel
+from Transformer.BrandIdentifierDecorator import BrandIdentifierDecorator
+from Transformer.ITransformer import ITransformer
 # from Extract.ExtractDataController import ExtractDataController
 from Transformer.TransformDataController import TransformDataController
 # from Extract.WhatsAppApi import WhatsAppApi
 import requests
 from flask import Flask, request, jsonify
 
-from Transformer.TransformerDecorator import TransformerDecorator
-
 app = Flask(__name__)
 
 if __name__ == '__main__':
     print("🚀 Starting system...")
     transformer = BaseTransformerModel()
+    brand_identifier = BrandIdentifierDecorator(transformer)
     print("📩 Transformer initialized.")
-    decorator = TransformerDecorator(transformer)
 
     extractor = ExtractDataController()
     print("📩 Extractor initialized.")
@@ -36,9 +36,8 @@ if __name__ == '__main__':
     setup_queues()
 
     # Start the TransformDataController to listen for messages
-    transform_controller = TransformDataController(transformer, decorator)
+    transform_controller = TransformDataController()
     transform_controller.start_listening()
-
 
     print("🚀 System running. Waiting for webhook events...")
     while True:

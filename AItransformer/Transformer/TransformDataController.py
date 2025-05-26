@@ -11,15 +11,17 @@ from functools import reduce
 from operator import getitem
 from Dtos.Trader_Dto import TraderDto
 from Dtos.Group_Dto import GroupDto
+from Transformer.BaseTransformerModel import BaseTransformerModel
+from Transformer.BrandIdentifierDecorator import BrandIdentifierDecorator
 from Transformer.MessageProcessingService import MessageProcessingService
 
 
 class TransformDataController:
-    def __init__(self, transformer, decorator):
+    def __init__(self):
         self.connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
         self.channel = self.connection.channel()
-        self.base = transformer
-        self.decorator = decorator
+        self.core = BaseTransformerModel()
+        self.base = BrandIdentifierDecorator(self.core)
         self.db = LoadDataController()
         self.msg_processing_service = MessageProcessingService()
 
@@ -49,25 +51,22 @@ class TransformDataController:
         self.db.load_data(ad)
 
     def process(self, message):
-        # Your real logic would go here
         print(f"[TransformDataController] Processing payload")
-        message = self.msg_processing_service.decode_message(message)
 
-        # Pre-processing:
+        message = self.msg_processing_service.decode_message(message)
         ad = self.msg_processing_service.pre_processing(message)
 
         if ad.text == '':
             print("❌ No text found in the message. Probably a media message.")
+            # apply image detection model
             return
-        text_output = self.base.transformData(message=ad.text)
 
-        # Decorator processing for the image
-        # img_output = ad.image  # use image model if you want to extract the watch from a photo
-        # video_output = ad.video  # use video model if needed
+        text_output = self.base.transformData(message=ad.text)  # Applies the NER model to the text
+
+
 
         # Post-processing:
         ad = self.msg_processing_service.post_processing(text_output, ad)
-        print(f"ad: \n {ad}")
         if ad is False:
             print("❌ post_processing failed.")
         else:
