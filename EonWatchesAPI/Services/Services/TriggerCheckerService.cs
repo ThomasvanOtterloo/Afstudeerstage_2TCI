@@ -94,7 +94,6 @@ public class TriggerCheckerService : BackgroundService
                         }
                     }
 
-                    // advance the cutoff so you only process each ad once
                     _lastCheck = now;
                 }
             }
