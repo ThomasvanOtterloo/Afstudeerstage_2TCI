@@ -1,4 +1,4 @@
-name: Build and SonarCloud analyze
+name: Build and SonarCloud Analyze (EonWatchesAPI only)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build & analyze only EonWatchesAPI
+    name: Build & SonarCloud (EonWatchesAPI)
     runs-on: windows-latest
 
     steps:
@@ -21,20 +21,30 @@ jobs:
       - name: Install SonarCloud scanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Begin SonarCloud analysis (only EonWatchesAPI)
+      # ───────────────────────────────────────────────────────────────────
+      # Option A (recommended): Put everything on one line (no backslashes)
+      # ───────────────────────────────────────────────────────────────────
+      - name: Begin SonarCloud analysis (EonWatchesAPI only)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          dotnet-sonarscanner begin \
-            /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" \
-            /o:"mysonarcloudtester" \
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.sources="EonWatchesAPI"
+        run: dotnet-sonarscanner begin /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.sources="EonWatchesAPI"
 
-      - name: Build EonWatchesAPI
-        run: |
-          # Or build the full solution if you want tests/projects to compile, but only EonWatchesAPI is scanned:
-          dotnet build EonWatchesAPI.sln --configuration Release
+      # ───────────────────────────────────────────────────────────────────
+      # Option B (alternate): Use PowerShell backticks (`) for line-continuation
+      # (Uncomment this block if you’d rather keep each switch on its own line.)
+      # ───────────────────────────────────────────────────────────────────
+      # - name: Begin SonarCloud analysis (EonWatchesAPI only)
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   run: |
+      #     dotnet-sonarscanner begin `
+      #       /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" `
+      #       /o:"mysonarcloudtester" `
+      #       /d:sonar.login="${{ secrets.SONAR_TOKEN }}" `
+      #       /d:sonar.sources="EonWatchesAPI"
+
+      - name: Build EonWatchesAPI project
+        run: dotnet build EonWatchesAPI/EonWatchesAPI.csproj --configuration Release
 
       - name: End SonarCloud analysis
         env:
