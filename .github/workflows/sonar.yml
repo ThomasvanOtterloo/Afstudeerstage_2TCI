@@ -1,4 +1,4 @@
-name: Build and sonar analyze
+name: Build and SonarCloud analyze
 
 on:
   push:
@@ -7,29 +7,34 @@ on:
 
 jobs:
   build:
-    name: Build and analyze
+    name: Build & analyze only EonWatchesAPI
     runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up .NET
+      - name: Set up .NET 8 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
       - name: Install SonarCloud scanner
-        run: |
-          dotnet tool install --global dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Begin SonarCloud analysis
+      - name: Begin SonarCloud analysis (only EonWatchesAPI)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet-sonarscanner begin /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          dotnet-sonarscanner begin \
+            /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" \
+            /o:"mysonarcloudtester" \
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.sources="EonWatchesAPI"
 
-      - name: Build
-        run: dotnet build
+      - name: Build EonWatchesAPI
+        run: |
+          # Or build the full solution if you want tests/projects to compile, but only EonWatchesAPI is scanned:
+          dotnet build EonWatchesAPI.sln --configuration Release
 
       - name: End SonarCloud analysis
         env:
