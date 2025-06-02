@@ -35,7 +35,7 @@ jobs:
             /o:"mysonarcloudtester" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.sources="EonWatchesAPI" \
-            /d:sonar.cs.opencover.reportsPaths="coverage/OpenCover.xml"
+            /d:sonar.cs.opencover.reportsPaths="coverage/OpenCover.xml" \
             /d:sonar.scanner.scanAll=false
 
       # 5) Restore all projects
