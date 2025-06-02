@@ -37,11 +37,5 @@ namespace EonWatchesAPI.Controllers
             var contentType = "image/jpeg";
             return File(fileStream, contentType, enableRangeProcessing: true);
         }
-
-
-
-
-
-
     }
 }
