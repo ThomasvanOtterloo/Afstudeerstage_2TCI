@@ -12,10 +12,11 @@ from Transformer.TransformerDecorator import TransformerDecorator
 class BrandIdentifierDecorator(TransformerDecorator):
     CONFIDENCE_THRESHOLD = 0.8
 
-    def __init__(self, wrapped, model_path="Model/ref2brand"):
+    def __init__(self, wrapped, model_path="../Model/ref2brand"):
         super().__init__(wrapped)
 
-        folder = Path(model_path).expanduser().resolve()
+        # folder = Path(model_path).expanduser().resolve()
+        folder = Path(__file__).parent.joinpath(model_path).resolve()
         # — load model & tokenizer exactly as before —
         self.model = DistilBertForSequenceClassification.from_pretrained(
             str(folder), local_files_only=True
@@ -26,7 +27,8 @@ class BrandIdentifierDecorator(TransformerDecorator):
 
         # —— now override the label mapping ——
         # (1) load your original brand list
-        with open("Model/brands.json", encoding="utf-8") as f:
+        brands_path = folder.parent / "brands.json"
+        with open(brands_path, encoding="utf-8") as f:
             raw = json.load(f)
         # (2) get a sorted, unique list of brand names
         unique_brands = sorted({entry["brand"] for entry in raw})
@@ -85,5 +87,3 @@ class BrandIdentifierDecorator(TransformerDecorator):
 
         # 5) only after the loop do we serialize & return
         return json.dumps(records)
-
-
