@@ -21,23 +21,17 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # 3) Install SonarCloud scanner globally
+      # 3) Install SonarCloud Scanner
       - name: Install SonarCloud scanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      # 4) Begin SonarCloud analysis, restricting analysis to EonWatchesAPI
-      #    and telling SonarCloud where the coverage report will be generated.
+      # 4) Begin SonarCloud analysis (only EonWatchesAPI, points to coverage file)
       - name: Begin SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet-sonarscanner begin \
-              /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" \
-              /o:"mysonarcloudtester" \
-              /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-              /d:sonar.sources="EonWatchesAPI" \
-              /d:sonar.cs.opencover.reportsPaths="coverage/OpenCover.xml"
+        run: dotnet-sonarscanner begin /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.sources="EonWatchesAPI" /d:sonar.cs.opencover.reportsPaths="coverage/OpenCover.xml"
 
-      # 5) Restore all projects (so that EonWatchesAPI and tests can build)
+      # 5) Restore all projects
       - name: Restore dependencies
         run: dotnet restore
 
@@ -45,16 +39,11 @@ jobs:
       - name: Build solution
         run: dotnet build EonWatchesAPI.sln --configuration Release
 
-      # 7) Run unit tests AND collect code coverage with Coverlet
+      # 7) Run unit tests and collect coverage via Coverlet
       - name: Run tests and collect coverage
-        run: |
-          dotnet test EonWatchesAPI.sln \
-            --configuration Release \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=coverage/OpenCover.xml
+        run: dotnet test EonWatchesAPI.sln --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage/OpenCover.xml
 
-      # 8) End SonarCloud analysis (imports coverage data and computes metrics)
+      # 8) End SonarCloud analysis (imports coverage data)
       - name: End SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
