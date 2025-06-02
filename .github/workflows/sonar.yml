@@ -54,7 +54,16 @@ jobs:
             --configuration Release \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput="coverage/OpenCover.xml"
+            /p:CoverletOutput="$(pwd)/coverage/OpenCover.xml"
+
+ # 7.5) Debug coverage output (check if file was generated)
+      - name: Debug coverage output
+        run: |
+          echo "== Listing contents of coverage folder =="
+          ls -l coverage
+          echo "== First 20 lines of coverage/OpenCover.xml =="
+          head -n 20 coverage/OpenCover.xml || echo "coverage/OpenCover.xml not found"
+
 
       # 8) End SonarCloud analysis (imports coverage data)
       - name: End SonarCloud analysis
