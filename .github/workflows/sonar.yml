@@ -9,23 +9,19 @@ on:
 jobs:
   build-and-analyze:
     name: Build, Test & SonarCloud (EonWatchesAPI)
-    runs-on: ubuntu-latest
+    runs-on: windows-latest            # <-- use Windows instead of ubuntu-latest
 
     steps:
-      # 1) Check out the repo
       - uses: actions/checkout@v4
 
-      # 2) Install .NET 8 SDK
       - name: Set up .NET 8 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      # 3) Install SonarCloud Scanner
       - name: Install SonarCloud scanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      # 4) Begin SonarCloud analysis
       - name: Begin SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -38,15 +34,12 @@ jobs:
             /d:sonar.cs.opencover.reportsPaths="MyApi.Tests/coverage/coverage.opencover.xml" \
             /d:sonar.scanner.scanAll=false
 
-      # 5) Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
-      # 6) Build the solution
       - name: Build solution
         run: dotnet build EonWatchesAPI.sln --configuration Release
 
-      # 7) Run tests and collect OpenCover-format coverage
       - name: Run tests and collect coverage
         run: |
           dotnet test EonWatchesAPI.sln \
@@ -55,7 +48,6 @@ jobs:
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput="$(pwd)/MyApi.Tests/coverage/coverage.opencover.xml"
 
-      # 7.5) Debug: Confirm coverage file was created
       - name: Debug coverage output
         run: |
           echo "== Listing contents of MyApi.Tests/coverage =="
@@ -63,7 +55,6 @@ jobs:
           echo "== First 20 lines of coverage.opencover.xml =="
           head -n 20 MyApi.Tests/coverage/coverage.opencover.xml || echo "File not found"
 
-      # 8) End SonarCloud analysis
       - name: End SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
