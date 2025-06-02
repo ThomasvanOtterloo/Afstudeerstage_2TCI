@@ -1,4 +1,5 @@
-name: Run MyApi.Tests
+# File: .github/workflows/test.yml
+name: Run .NET 8 Unit Tests
 
 on:
   push:
@@ -11,18 +12,23 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      # 1) Check out your repository
       - uses: actions/checkout@v4
 
+      # 2) Install .NET 8 SDK
       - name: Set up .NET 8 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore all projects
+      # 3) Restore all projects (NuGet packages, etc.)
+      - name: Restore dependencies
         run: dotnet restore
 
+      # 4) Build the entire solution in Release mode
       - name: Build solution
-        run: dotnet build --configuration Release
+        run: dotnet build EonWatchesAPI.sln --configuration Release
 
-      - name: Run MyApi.Tests
-        run: dotnet test MyApi.Tests/MyApi.Tests.csproj --configuration Release --verbosity normal
+      # 5) Run all tests in the solution (this will discover MyApi.Tests automatically)
+      - name: Run unit tests
+        run: dotnet test EonWatchesAPI.sln --configuration Release --verbosity normal
