@@ -22,8 +22,8 @@ namespace EonWatchesAPI.Controllers
         {
             try
             {
-                var result = await _groupService.GetGroups(token); // await is essentieel!
-                return Ok(result); // dit moet een gewone List<GroupDto> zijn
+                var result = await _groupService.GetGroups(token); 
+                return Ok(result);
 
 
             }
