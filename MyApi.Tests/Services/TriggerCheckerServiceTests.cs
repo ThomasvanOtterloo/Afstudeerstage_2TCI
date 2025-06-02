@@ -19,7 +19,7 @@ namespace MyApi.Tests.Services
         private readonly ServiceProvider _serviceProvider;
         private readonly AppDbContext _dbContext;
         private readonly Mock<INotification> _notificationMock;
-        private readonly TriggerCheckerService _service;
+        private readonly TestableTriggerCheckerService _service;
         private readonly string _inMemoryDbName = Guid.NewGuid().ToString();
 
         public TriggerCheckerServiceTests()
@@ -35,16 +35,16 @@ namespace MyApi.Tests.Services
             _notificationMock = new Mock<INotification>();
             services.AddSingleton(_notificationMock.Object);
 
-            // 4) Build the provider
+            // 4) Build the service provider
             _serviceProvider = services.BuildServiceProvider();
 
             // 5) Resolve the DbContext and seed data
             _dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
             SeedDatabase();
 
-            // 6) Instantiate the service with a NullLogger and the ServiceProvider
+            // 6) Instantiate the *testable* service with a NullLogger
             var logger = new NullLogger<TriggerCheckerService>();
-            _service = new TriggerCheckerService(logger, _serviceProvider);
+            _service = new TestableTriggerCheckerService(logger, _serviceProvider);
         }
 
         private void SeedDatabase()
@@ -59,7 +59,7 @@ namespace MyApi.Tests.Services
             _dbContext.Traders.Add(trader);
             _dbContext.SaveChanges();
 
-            // Create a Trigger that matches brand "BrandX"
+            // Create a Trigger matching brand "BrandX"
             var trigger = new Trigger
             {
                 Brand = "BrandX",
@@ -69,7 +69,7 @@ namespace MyApi.Tests.Services
             };
             _dbContext.Triggers.Add(trigger);
 
-            // Create an Ad with CreatedAt > _lastCheck (default is 50 days ago)
+            // Create an Ad (CreatedAt = now, so it is > default _lastCheck)
             var ad = new Ad
             {
                 Id = 1,
@@ -86,34 +86,32 @@ namespace MyApi.Tests.Services
         }
 
         [Fact]
-        public async Task StartAsync_ShouldSendNotification_WhenAdMatchesTrigger()
+        public async Task ExecuteOnceAsync_ShouldSendNotification_WhenAdMatchesTrigger()
         {
-            // Arrange
+            // Arrange: cancel after a short delay so that the loop runs exactly once
             using var cts = new CancellationTokenSource();
-            // Cancel after 200ms so StartAsync only runs one iteration
             cts.CancelAfter(TimeSpan.FromMilliseconds(200));
 
-            // Act: swallow any TaskCanceledException so the test can continue
+            // Act: call the protected ExecuteAsync via our test subclass
             try
             {
-                await _service.StartAsync(cts.Token);
+                await _service.ExecuteOnceAsync(cts.Token);
             }
             catch (TaskCanceledException)
             {
-                // Expected when the token is canceled; swallow it
+                // We expect cancellation; swallow it
             }
 
-            // Assert: Notification.SendNotification should be called at least once
+            // Assert: Notification.SendNotification must have been called at least once
             _notificationMock.Verify(n =>
                 n.SendNotification(It.IsAny<SendEmailRequest>()),
                 Times.AtLeastOnce);
         }
 
-
         [Fact]
-        public async Task StartAsync_ShouldNotSendNotification_WhenNoMatchingAd()
+        public async Task ExecuteOnceAsync_ShouldNotSendNotification_WhenNoMatchingAd()
         {
-            // Arrange: remove the existing Ad and add a non-matching one
+            // Arrange: remove all Ads and add a non-matching one
             _dbContext.Ads.RemoveRange(_dbContext.Ads);
             var nonMatchingAd = new Ad
             {
@@ -132,9 +130,16 @@ namespace MyApi.Tests.Services
             cts.CancelAfter(TimeSpan.FromMilliseconds(200));
 
             // Act
-            await _service.StartAsync(cts.Token);
+            try
+            {
+                await _service.ExecuteOnceAsync(cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                // swallow
+            }
 
-            // Assert: No notifications should have been sent
+            // Assert: no notifications sent
             _notificationMock.Verify(n =>
                 n.SendNotification(It.IsAny<SendEmailRequest>()),
                 Times.Never);
@@ -145,6 +150,25 @@ namespace MyApi.Tests.Services
             // Clean up the in-memory database
             _dbContext.Database.EnsureDeleted();
             _serviceProvider.Dispose();
+        }
+
+        /// <summary>
+        /// A small test‐only subclass that exposes the protected ExecuteAsync as a public method.
+        /// </summary>
+        private class TestableTriggerCheckerService : TriggerCheckerService
+        {
+            public TestableTriggerCheckerService(
+                Microsoft.Extensions.Logging.ILogger<TriggerCheckerService> logger,
+                IServiceProvider serviceProvider)
+                : base(logger, serviceProvider)
+            {
+            }
+
+            // Expose the protected ExecuteAsync so our tests can call it directly:
+            public Task ExecuteOnceAsync(CancellationToken stoppingToken)
+            {
+                return base.ExecuteAsync(stoppingToken);
+            }
         }
     }
 }
