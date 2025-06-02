@@ -25,6 +25,11 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run MyApiTests
-        run: dotnet test src/MyApiTests/MyApiTests.csproj \
-               --configuration Release \
-               --verbosity normal
+        # Either put it all on one line:
+        run: dotnet test src/MyApiTests/MyApiTests.csproj --configuration Release --verbosity normal
+
+        # Or, if you want it broken up over multiple lines for readability:
+        # run: |
+        #   dotnet test src/MyApiTests/MyApiTests.csproj \
+        #     --configuration Release \
+        #     --verbosity normal
