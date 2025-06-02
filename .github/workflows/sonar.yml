@@ -1,4 +1,5 @@
-name: Build and SonarCloud Analyze (EonWatchesAPI only)
+# .github/workflows/ci-sonar-coverage.yml
+name: Build, Test & SonarCloud Analyze
 
 on:
   push:
@@ -6,46 +7,54 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build & SonarCloud (EonWatchesAPI)
+  build-and-analyze:
+    name: Build, Test & SonarCloud (EonWatchesAPI)
     runs-on: windows-latest
 
     steps:
+      # 1) Check out the repository
       - uses: actions/checkout@v4
 
+      # 2) Install .NET 8 SDK
       - name: Set up .NET 8 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
+      # 3) Install SonarCloud scanner globally
       - name: Install SonarCloud scanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      # ───────────────────────────────────────────────────────────────────
-      # Option A (recommended): Put everything on one line (no backslashes)
-      # ───────────────────────────────────────────────────────────────────
-      - name: Begin SonarCloud analysis (EonWatchesAPI only)
+      # 4) Begin SonarCloud analysis, restricting analysis to EonWatchesAPI
+      #    and telling SonarCloud where the coverage report will be generated.
+      - name: Begin SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet-sonarscanner begin /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.sources="EonWatchesAPI"
+        run: dotnet-sonarscanner begin \
+              /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" \
+              /o:"mysonarcloudtester" \
+              /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+              /d:sonar.sources="EonWatchesAPI" \
+              /d:sonar.cs.opencover.reportsPaths="coverage/OpenCover.xml"
 
-      # ───────────────────────────────────────────────────────────────────
-      # Option B (alternate): Use PowerShell backticks (`) for line-continuation
-      # (Uncomment this block if you’d rather keep each switch on its own line.)
-      # ───────────────────────────────────────────────────────────────────
-      # - name: Begin SonarCloud analysis (EonWatchesAPI only)
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   run: |
-      #     dotnet-sonarscanner begin `
-      #       /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" `
-      #       /o:"mysonarcloudtester" `
-      #       /d:sonar.login="${{ secrets.SONAR_TOKEN }}" `
-      #       /d:sonar.sources="EonWatchesAPI"
+      # 5) Restore all projects (so that EonWatchesAPI and tests can build)
+      - name: Restore dependencies
+        run: dotnet restore
 
-      - name: Build EonWatchesAPI project
-        run: dotnet build EonWatchesAPI/EonWatchesAPI.csproj --configuration Release
+      # 6) Build the entire solution in Release mode
+      - name: Build solution
+        run: dotnet build EonWatchesAPI.sln --configuration Release
 
+      # 7) Run unit tests AND collect code coverage with Coverlet
+      - name: Run tests and collect coverage
+        run: |
+          dotnet test EonWatchesAPI.sln \
+            --configuration Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=coverage/OpenCover.xml
+
+      # 8) End SonarCloud analysis (imports coverage data and computes metrics)
       - name: End SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
