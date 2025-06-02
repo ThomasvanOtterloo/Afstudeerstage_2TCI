@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -35,14 +34,14 @@ namespace MyApi.Tests.Services
             _notificationMock = new Mock<INotification>();
             services.AddSingleton(_notificationMock.Object);
 
-            // 4) Build the service provider
+            // 4) Build the provider
             _serviceProvider = services.BuildServiceProvider();
 
             // 5) Resolve the DbContext and seed data
             _dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
             SeedDatabase();
 
-            // 6) Instantiate the *testable* service with a NullLogger
+            // 6) Instantiate the testable service with a NullLogger
             var logger = new NullLogger<TriggerCheckerService>();
             _service = new TestableTriggerCheckerService(logger, _serviceProvider);
         }
@@ -59,7 +58,7 @@ namespace MyApi.Tests.Services
             _dbContext.Traders.Add(trader);
             _dbContext.SaveChanges();
 
-            // Create a Trigger matching brand "BrandX"
+            // Create a Trigger that matches brand "BrandX"
             var trigger = new Trigger
             {
                 Brand = "BrandX",
@@ -69,7 +68,7 @@ namespace MyApi.Tests.Services
             };
             _dbContext.Triggers.Add(trigger);
 
-            // Create an Ad (CreatedAt = now, so it is > default _lastCheck)
+            // Create an Ad (CreatedAt = now, so > default lastCheck)
             var ad = new Ad
             {
                 Id = 1,
@@ -88,21 +87,44 @@ namespace MyApi.Tests.Services
         [Fact]
         public async Task ExecuteOnceAsync_ShouldSendNotification_WhenAdMatchesTrigger()
         {
-            // Arrange: cancel after a short delay so that the loop runs exactly once
-            using var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromMilliseconds(200));
+            // Arrange: we want to know the moment SendNotification is called.
+            var tcs = new TaskCompletionSource<bool>();
 
-            // Act: call the protected ExecuteAsync via our test subclass
+            _notificationMock
+                .Setup(n => n.SendNotification(It.IsAny<SendEmailRequest>()))
+                .Callback(() => tcs.TrySetResult(true));
+
+            // Use a CancellationTokenSource that we will cancel manually
+            var cts = new CancellationTokenSource();
+
+            // Act: fire the protected ExecuteAsync (wrapped by ExecuteOnceAsync).
+            var execTask = _service.ExecuteOnceAsync(cts.Token);
+
+            // Wait until either (a) our TCS is signaled, or (b) a 5s timeout.
+            var signaledTask = await Task.WhenAny(tcs.Task, Task.Delay(5000));
+            if (signaledTask == tcs.Task)
+            {
+                // As soon as we see SendNotification invoked, cancel the service.
+                cts.Cancel();
+            }
+            else
+            {
+                // If 5 seconds pass without a notification, fail the test.
+                cts.Cancel();
+                throw new Exception("Timed out waiting for SendNotification to be called");
+            }
+
+            // Now await the service task to finish (will throw TaskCanceled, which we swallow)
             try
             {
-                await _service.ExecuteOnceAsync(cts.Token);
+                await execTask;
             }
             catch (TaskCanceledException)
             {
-                // We expect cancellation; swallow it
+                // expected once we call cts.Cancel()
             }
 
-            // Assert: Notification.SendNotification must have been called at least once
+            // Assert: the mock should have been called at least once
             _notificationMock.Verify(n =>
                 n.SendNotification(It.IsAny<SendEmailRequest>()),
                 Times.AtLeastOnce);
@@ -111,7 +133,7 @@ namespace MyApi.Tests.Services
         [Fact]
         public async Task ExecuteOnceAsync_ShouldNotSendNotification_WhenNoMatchingAd()
         {
-            // Arrange: remove all Ads and add a non-matching one
+            // Arrange: remove all ads and add a non-matching one
             _dbContext.Ads.RemoveRange(_dbContext.Ads);
             var nonMatchingAd = new Ad
             {
@@ -126,23 +148,43 @@ namespace MyApi.Tests.Services
             _dbContext.Ads.Add(nonMatchingAd);
             _dbContext.SaveChanges();
 
-            using var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromMilliseconds(200));
+            // This time we’ll wait a short period, then cancel if still not signaled.
+            var tcs = new TaskCompletionSource<bool>();
+            _notificationMock
+                .Setup(n => n.SendNotification(It.IsAny<SendEmailRequest>()))
+                .Callback(() => tcs.TrySetResult(true));
+
+            var cts = new CancellationTokenSource();
 
             // Act
-            try
-            {
-                await _service.ExecuteOnceAsync(cts.Token);
-            }
-            catch (TaskCanceledException)
-            {
-                // swallow
-            }
+            var execTask = _service.ExecuteOnceAsync(cts.Token);
 
-            // Assert: no notifications sent
-            _notificationMock.Verify(n =>
-                n.SendNotification(It.IsAny<SendEmailRequest>()),
-                Times.Never);
+            // If SendNotification is called within 5s, tcs.Task will complete. Otherwise timeout.
+            var signaledTask = await Task.WhenAny(tcs.Task, Task.Delay(5000));
+            if (signaledTask == tcs.Task)
+            {
+                // Unexpected: if this fires, someone called SendNotification
+                cts.Cancel();
+                throw new Exception("SendNotification was called even though no ad matched");
+            }
+            else
+            {
+                // After 5s with no notification, cancel the service.
+                cts.Cancel();
+                try
+                {
+                    await execTask;
+                }
+                catch (TaskCanceledException)
+                {
+                    // expected
+                }
+
+                // Assert: the mock should never have been called
+                _notificationMock.Verify(n =>
+                    n.SendNotification(It.IsAny<SendEmailRequest>()),
+                    Times.Never);
+            }
         }
 
         public void Dispose()
@@ -153,7 +195,7 @@ namespace MyApi.Tests.Services
         }
 
         /// <summary>
-        /// A small test‐only subclass that exposes the protected ExecuteAsync as a public method.
+        /// Exposes the protected ExecuteAsync as a public method for testing.
         /// </summary>
         private class TestableTriggerCheckerService : TriggerCheckerService
         {
@@ -164,7 +206,6 @@ namespace MyApi.Tests.Services
             {
             }
 
-            // Expose the protected ExecuteAsync so our tests can call it directly:
             public Task ExecuteOnceAsync(CancellationToken stoppingToken)
             {
                 return base.ExecuteAsync(stoppingToken);
