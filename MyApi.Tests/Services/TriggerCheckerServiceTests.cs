@@ -93,14 +93,22 @@ namespace MyApi.Tests.Services
             // Cancel after 200ms so StartAsync only runs one iteration
             cts.CancelAfter(TimeSpan.FromMilliseconds(200));
 
-            // Act
-            await _service.StartAsync(cts.Token);
+            // Act: swallow any TaskCanceledException so the test can continue
+            try
+            {
+                await _service.StartAsync(cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                // Expected when the token is canceled; swallow it
+            }
 
             // Assert: Notification.SendNotification should be called at least once
             _notificationMock.Verify(n =>
                 n.SendNotification(It.IsAny<SendEmailRequest>()),
                 Times.AtLeastOnce);
         }
+
 
         [Fact]
         public async Task StartAsync_ShouldNotSendNotification_WhenNoMatchingAd()
