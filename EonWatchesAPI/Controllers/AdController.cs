@@ -40,7 +40,6 @@ namespace EonWatchesAPI.Controllers
             var createdAd = await _adService.CreateAd(dto);
 
             // Return 201 Created
-            // “GetAdById” is the name of the action above; we pass route‐values new { id = createdAd.Id }
             return CreatedAtAction(
                 nameof(GetAdById),
                 new { id = createdAd.Id },

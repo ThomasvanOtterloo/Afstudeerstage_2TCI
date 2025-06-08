@@ -51,8 +51,12 @@ public class DistributeAdService : IDistributeAdService
 
             await strategy.SendImageToGroups(ad.BearerToken, ad.Text, dataUri, ad.GroupIds);
         }
-    }
-
+    } 
     
+    // vanuit sendImageTogGroup, extract een Ad object erbij af. dan de ad distribueren, krijgt een json object terug. extract
+    // de MessageId ervan, GroupId, PhoneNumber, TraderName, Maak er een mapping naar Ad van, en dan naar AdRepository.
+    // In het etl proces check je dan of het MessageId al bestaan in de database, zo ja doet die niks, zo nee gaat die door naar het ai
+    // model. Ook een check maken TraderId, ReferentieNummer Unique constraint, zodat 
+
 }
 

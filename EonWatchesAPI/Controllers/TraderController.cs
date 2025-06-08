@@ -33,6 +33,4 @@ public class TraderController : ControllerBase
     {
         return await _traderService.CreateTrader(trader);
     }
-    
-    
 }

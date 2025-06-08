@@ -1,4 +1,3 @@
-using EonWatchesAPI.Connections;
 using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
 using EonWatchesAPI.DbContext.Repositories;

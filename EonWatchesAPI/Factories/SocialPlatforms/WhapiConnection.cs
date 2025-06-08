@@ -3,7 +3,7 @@ using EonWatchesAPI.Factories;
 using RestSharp;
 using System.Text.Json;
 
-namespace EonWatchesAPI.Connections;
+namespace EonWatchesAPI.Factories.SocialPlatforms;
 
 public class WhapiConnection : ISocialConnection
 {
@@ -44,7 +44,7 @@ public class WhapiConnection : ISocialConnection
             {
                 typing_time = 3,
                 to = id,
-                caption = caption,
+                caption,
                 media = base64Image
             });
 
