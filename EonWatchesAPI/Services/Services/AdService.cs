@@ -1,6 +1,7 @@
-using EonWatchesAPI.DbContext;
+﻿using EonWatchesAPI.DbContext;
 using EonWatchesAPI.DbContext.I_Repositories;
 using EonWatchesAPI.Dtos;
+using EonWatchesAPI.Dtos.MappingExtensions;
 using EonWatchesAPI.Services.I_Services;
 
 namespace EonWatchesAPI.Services.Services;
@@ -16,20 +17,18 @@ public class AdService : IAdService
 
     public Task<IEnumerable<Ad>> GetAds()
     {
-        // logic to get all ads
 
         return _adRepository.GetAds();
     }
 
     public Task<Ad> GetAdById(int id)
     {
-        // logic to get ad by id
-
         return _adRepository.GetAdById(id);
     }
 
-    public Task<Ad> CreateAd(Ad ad)
+    public Task<Ad> CreateAd(CreateAdDto dto)
     {
+        var ad = dto.ToEntity();
         return _adRepository.CreateAd(ad);
     }
 

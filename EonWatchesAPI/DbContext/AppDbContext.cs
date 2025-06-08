@@ -40,14 +40,12 @@ public partial class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
         modelBuilder.Entity<Ad>()
         .HasOne(ad => ad.Trader)
         .WithMany(t => t.Ads)
-        .HasForeignKey(ad => ad.TraderId)
-        .OnDelete(DeleteBehavior.Restrict);
+        .HasForeignKey(ad => ad.TraderId);
 
         modelBuilder.Entity<Ad>()
         .HasOne(ad => ad.Group)
         .WithMany()
-        .HasForeignKey(ad => ad.GroupId)
-        .OnDelete(DeleteBehavior.Cascade);
+        .HasForeignKey(ad => ad.GroupId);
 
         modelBuilder.Entity<WhitelistedGroups>()
             .HasOne(t => t.Trader)

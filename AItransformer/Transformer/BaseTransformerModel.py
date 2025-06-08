@@ -1,12 +1,12 @@
 from abc import ABC
-import torch
 from unsloth import FastLanguageModel
+import torch
 from Transformer.ITransformer import ITransformer
+import os
 
 
 class BaseTransformerModel(ITransformer):
     def __init__(self):
-        # 1. Load model & tokenizer via Unsloth
         self.model, self.tokenizer = FastLanguageModel.from_pretrained(
             "unsloth/Qwen3-4B-unsloth-bnb-4bit",
             max_seq_length=4092,
@@ -16,7 +16,12 @@ class BaseTransformerModel(ITransformer):
         FastLanguageModel.for_inference(self.model)
 
         # 2. Load system prompt
-        with open("Transformer/system_prompt.txt", encoding="utf-8") as f:
+
+        base_path = os.path.dirname(os.path.abspath(__file__))  # directory of BaseTransformerModel.py
+        prompt_path = os.path.join(base_path, "system_prompt.txt")
+
+        with open(prompt_path, encoding="utf-8") as f:
+        # with open("Transformer/system_prompt.txt", encoding="utf-8") as f:
             self.system_prompt = f.read().strip()
 
     def transformData(

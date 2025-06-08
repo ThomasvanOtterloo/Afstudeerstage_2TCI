@@ -22,26 +22,41 @@ public class DistributeAdService : IDistributeAdService
         _strategies = strategies;
     }
 
-    public async Task SendMessageToGroup(ConnectionType[] connections, string token, string text, List<string> groupIds)
+    public async Task SendMessageToGroup(SendMessageDto ad)
     {
-        foreach (var type in connections)
+        foreach (var type in ad.ConnectionType)
         {
             if (!_strategies.TryGetValue(type, out var strategy))
                 throw new NotSupportedException($"Unsupported connection type: {type}");
 
-            await strategy.SendTextToGroups(token, text, groupIds);
+            await strategy.SendTextToGroups(ad.BearerToken, ad.Text, ad.GroupIds);
         }
     }
 
-    public async Task SendImageToGroup(ConnectionType[] connections, string token, string caption, string base64, List<string> groupIds)
+    public async Task SendImageToGroup(SendImageCaptionDto ad)
     {
-        foreach (var type in connections)
+        using var ms = new MemoryStream();
+        await ad.Image.CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        var b64 = Convert.ToBase64String(bytes);
+
+        var mimeType = ad.Image.ContentType; // Optional
+        var dataUri = $"data:{mimeType};base64,{b64}";
+
+
+        foreach (var type in ad.ConnectionType)
         {
             if (!_strategies.TryGetValue(type, out var strategy))
                 throw new NotSupportedException($"Unsupported connection type: {type}");
 
-            await strategy.SendImageToGroups(token, caption, base64, groupIds);
+            await strategy.SendImageToGroups(ad.BearerToken, ad.Text, dataUri, ad.GroupIds);
         }
-    }
+    } 
+    
+    // vanuit sendImageTogGroup, extract een Ad object erbij af. dan de ad distribueren, krijgt een json object terug. extract
+    // de MessageId ervan, GroupId, PhoneNumber, TraderName, Maak er een mapping naar Ad van, en dan naar AdRepository.
+    // In het etl proces check je dan of het MessageId al bestaan in de database, zo ja doet die niks, zo nee gaat die door naar het ai
+    // model. Ook een check maken TraderId, ReferentieNummer Unique constraint, zodat 
+
 }
 

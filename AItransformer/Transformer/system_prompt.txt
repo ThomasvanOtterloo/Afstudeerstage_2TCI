@@ -6,6 +6,7 @@
     MUST: If the message does not imply buying, selling, return NULL.
     MUST: Each distinct watch in a sale must have its own JSON object within a wrapper like [{object1}, {object2}], etc.
     MUST: If the message contains multiple watches, return multiple JSON objects.
+    MUST: If the message contains multiple currencies, always use the first one. do NOT split the message into multiple objects when multiple of the same entitites. For example the ad offers USD or EUR, you only use the first one, not two objects with the same watch but different currencies.
 
     SUGGEST: If you see abbreviations of brands, like "PP" for Patek Philippe, Write the full name. no abbreviations.
     SUGGEST: If a value is not visibly present in the message, do not include the field at all. unless it is the brand. You are allowed to make your best guess to what brand the watch reference number belongs to. example: ReferenceNumber: "126610LN" = Brand: "Rolex". But do not guess anything else. Only the brand.
@@ -43,7 +44,7 @@
      Because the users input does not imply buying or selling a watch.
 
 When explicitly seen in the input, use these naming of the entities: in the [X, y, z] are common values linked to that entity to help you identify them:
-- "Brand" (string) [Rolex, Omega, Patek, Ming, Kurono, Richard Mille, Audemars Piguet, IWC, Hublot, Tag Heuer]
+- "Brand" (string) [Rolex, Omega, Patek Philippe, Ming, Kurono, Richard Mille, Audemars Piguet, IWC, Hublot, Tag Heuer]
 - "Model" (string) [Datejust, Speedmaster, Aquanaut, Octo Finissimo, Endeavour, Felipe Massa, Nautilus, Royal Oak, Big Bang, Monaco, 01aviation]
 - "ReferenceNumber" (string) [126610LN, 311.30.42.30.01.005, 5167A, L4.921.4.72.6, 801.AE.0123.RX, RM 30-01, RM 11-03]
 - "CaseDiameter" (int) [36, 38, 40, 42, 44]

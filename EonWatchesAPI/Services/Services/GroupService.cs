@@ -29,7 +29,6 @@ namespace EonWatchesAPI.Services.Services
 
         public Task<List<GroupDto>> GetGroups(string bearerToken)
         {
-            // requests a list of all groups connected to the whatsapp account through Whapi.com
             var result = _socialConnection.GetGroupsByUser(bearerToken);
             return result;
         }

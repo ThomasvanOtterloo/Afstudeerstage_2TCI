@@ -494,3 +494,9 @@ AItransformer/unsloth_compiled_cache/
 EonWatchesAPI/Migrations/
 
 AItransformer/Model/ref2brand/model.safetensors
+
+AItransformer/Tests/unsloth_compiled_cache/
+
+MyApi.Tests/TestReports/
+
+AItransformer/Tests/

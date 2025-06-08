@@ -13,13 +13,10 @@ public class DistributeAdRepository : IDistributeAdRepository
         _adRepository = adRepository;
     }
     
-    public Task<IActionResult> DistributeAd(Ad ad)
+    public async Task<bool> DistributeAd(Ad ad)
     {
-        _adRepository.CreateAd(ad);
-        
-        
-        
-        return null; 
+        await _adRepository.CreateAd(ad);
+        return true;
     }
     
 }

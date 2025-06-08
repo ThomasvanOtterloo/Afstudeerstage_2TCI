@@ -1,47 +1,67 @@
-using EonWatchesAPI.DbContext;
-using EonWatchesAPI.DbContext.I_Repositories;
+﻿using EonWatchesAPI.DbContext;
 using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Services.I_Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EonWatchesAPI.Controllers;
-
-[ApiController]
-[Route("[controller]")]
-public class AdController : ControllerBase
+namespace EonWatchesAPI.Controllers
 {
-    private readonly IAdService _adService;
-
-    public AdController(IAdService adService)
+    [ApiController]
+    [Route("[controller]")]
+    public class AdController : ControllerBase
     {
-        _adService = adService;
-    }
+        private readonly IAdService _adService;
 
-    [HttpGet("{id}")]
-    public async Task<Ad> GetAdById(int id)
-    {
-        return await _adService.GetAdById(id);
-    }
-
-    [HttpPost]
-    public async Task<Ad> CreateAd(Ad ad)
-    {
-        return await _adService.CreateAd(ad);
-    }
-
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Ad>>> GetAds([FromQuery] AdFilterDto? filter)
-    {
-        try
+        public AdController(IAdService adService)
         {
-            var results = await _adService.GetAdsByFilter(filter);
-            return Ok(results);
+            _adService = adService;
         }
-        catch (ArgumentException ex)
+
+        // GET /Ad/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAdById(int id)
         {
-            // returns a 400, with your ex.Message in the response body
-            return BadRequest(ex.Message);
+            var ad = await _adService.GetAdById(id);
+
+            if (ad == null)
+            {
+                // No ad found → 204 No Content
+                return NoContent();
+            }
+
+            // Ad found → 200 OK + payload
+            return Ok(ad);
+        }
+
+        // POST /Ad
+        [HttpPost]
+        public async Task<IActionResult> CreateAd([FromBody] CreateAdDto dto)
+        {
+            // CreateAd returns an Ad object with its new Id
+            var createdAd = await _adService.CreateAd(dto);
+
+            // Return 201 Created
+            return CreatedAtAction(
+                nameof(GetAdById),
+                new { id = createdAd.Id },
+                createdAd
+            );
+        }
+
+        // GET /Ad?Brand=foo&…
+        [HttpGet]
+        public async Task<IActionResult> GetAds([FromQuery] AdFilterDto? filter)
+        {
+            try
+            {
+                var results = await _adService.GetAdsByFilter(filter);
+                // 200 OK + list
+                return Ok(results);
+            }
+            catch (ArgumentException ex)
+            {
+                // 400 Bad Request + exception message
+                return BadRequest(ex.Message);
+            }
         }
     }
-
 }

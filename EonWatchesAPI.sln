@@ -1,18 +1,51 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35919.96
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EonWatchesAPI", "EonWatchesAPI\EonWatchesAPI.csproj", "{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyApi.Tests", "MyApi.Tests\MyApi.Tests.csproj", "{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Debug|x64.Build.0 = Debug|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Debug|x86.Build.0 = Debug|Any CPU
 		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Release|x64.ActiveCfg = Release|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Release|x64.Build.0 = Release|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Release|x86.ActiveCfg = Release|Any CPU
+		{1B3B9D39-5CCA-4BB3-8158-DE85865FD574}.Release|x86.Build.0 = Release|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Debug|x64.Build.0 = Debug|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Debug|x86.Build.0 = Debug|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Release|x64.ActiveCfg = Release|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Release|x64.Build.0 = Release|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Release|x86.ActiveCfg = Release|Any CPU
+		{999F3346-3CC0-3E8B-BCF8-F27EA87E8FE9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5F1B150A-732C-467C-8DB4-496DB09D5F06}
 	EndGlobalSection
 EndGlobal

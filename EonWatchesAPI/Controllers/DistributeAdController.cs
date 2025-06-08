@@ -24,7 +24,7 @@ public class DistributeAdController : ControllerBase
     {
         try
         {
-            await _distributeAdService.SendMessageToGroup(ad.ConnectionType, ad.BearerToken, ad.Text, ad.GroupIds);
+            await _distributeAdService.SendMessageToGroup(ad);
             return Ok();
         }
         catch (Exception ex) {
@@ -38,27 +38,12 @@ public class DistributeAdController : ControllerBase
     {
         try
         {
-            using var ms = new MemoryStream();
-            await ad.Image.CopyToAsync(ms);
-            var bytes = ms.ToArray();
-            var b64 = Convert.ToBase64String(bytes);
-
-            var mimeType = ad.Image.ContentType; // Optional
-            var dataUri = $"data:{mimeType};base64,{b64}";
-
-            await _distributeAdService.SendImageToGroup(
-                ad.ConnectionType,
-                ad.BearerToken,
-                ad.Text,
-                dataUri,
-                ad.GroupIds
-            );
+            await _distributeAdService.SendImageToGroup(ad);
 
             return Ok();
         }
         catch (Exception ex)
         {
-            Console.WriteLine("? Error in DistributeAdController.SendMessageWithImage");
             return BadRequest(ex.Message);
         }
     }

@@ -79,9 +79,6 @@ public class TriggerController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log the exception details
-            Console.Error.WriteLine($"Error deleting trigger {id}: {ex}");
-
             // Return a generic 500 with no sensitive exception details
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }

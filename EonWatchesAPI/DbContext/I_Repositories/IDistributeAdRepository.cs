@@ -4,6 +4,6 @@ namespace EonWatchesAPI.DbContext.I_Repositories;
 
 public interface IDistributeAdRepository
 {
-    public Task<IActionResult> DistributeAd(Ad ad);
+    public Task<bool> DistributeAd(Ad ad);
     
 }

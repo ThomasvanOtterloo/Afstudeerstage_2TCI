@@ -8,6 +8,6 @@ public interface IAdService
     
     public Task<IEnumerable<Ad>> GetAds();
     public Task<Ad> GetAdById(int id);
-    public Task<Ad> CreateAd(Ad ad);
+    public Task<Ad> CreateAd(CreateAdDto ad);
     public Task<IEnumerable<Ad>> GetAdsByFilter(AdFilterDto filter);
 }

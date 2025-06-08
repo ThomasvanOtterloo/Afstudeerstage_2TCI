@@ -42,7 +42,7 @@ public class AdRepository : IAdRepository
             q = q.Where(ad => ad.Model == model);
 
         if (!string.IsNullOrWhiteSpace(referenceNumber))
-            q = q.Where(ad => ad.ReferenceNumber == referenceNumber);
+            q = q.Where(ad => ad.ReferenceNumber!.Contains(referenceNumber));
 
         if (daysAgo.HasValue)
         {

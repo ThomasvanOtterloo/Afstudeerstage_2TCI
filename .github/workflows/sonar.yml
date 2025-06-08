@@ -1,4 +1,4 @@
-name: Build and analyze
+name: Build, Test & SonarCloud Analyze
 
 on:
   push:
@@ -6,30 +6,48 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build and analyze
+  build-and-analyze:
+    name: Build, Test & SonarCloud (EonWatchesAPI)
     runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up .NET
+      - name: Set up .NET 8 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
       - name: Install SonarCloud scanner
-        run: |
-          dotnet tool install --global dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Begin SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet-sonarscanner begin /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          dotnet-sonarscanner begin /k:"ThomasvanOtterloo_Afstudeerstage_2TCI" /o:"mysonarcloudtester" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.sources="EonWatchesAPI" /d:sonar.cs.opencover.reportsPaths="MyApi.Tests/coverage/coverage.opencover.xml" /d:sonar.scanner.scanAll=false
 
-      - name: Build
-        run: dotnet build
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build EonWatchesAPI.sln --configuration Release
+
+      - name: Run tests and collect coverage
+        run: |
+          dotnet test EonWatchesAPI.sln --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$(pwd)\MyApi.Tests\coverage\coverage.opencover.xml"
+
+      - name: Debug coverage output
+        shell: pwsh
+        run: |
+          Write-Host "== Listing contents of MyApi.Tests/coverage =="
+          Get-ChildItem "MyApi.Tests\coverage"
+          Write-Host "== First 20 lines of coverage.opencover.xml =="
+          if (Test-Path "MyApi.Tests\coverage\coverage.opencover.xml") {
+            Get-Content "MyApi.Tests\coverage\coverage.opencover.xml" -TotalCount 20
+          } else {
+            Write-Host "File not found"
+          }
 
       - name: End SonarCloud analysis
         env:
