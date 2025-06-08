@@ -12,5 +12,6 @@ public class Trader
     //public Roles Role { get; set; } = Roles.TRADER;
     public ICollection<WhitelistedGroups> WhitelistedGroups { get; set; } = new List<WhitelistedGroups>();
     public ICollection<Ad> Ads { get; set; } = new List<Ad>();
+    public string? WhapiBearerToken { get; set; }
 
 }

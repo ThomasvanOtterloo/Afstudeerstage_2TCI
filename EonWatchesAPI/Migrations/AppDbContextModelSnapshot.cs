@@ -146,6 +146,9 @@ namespace EonWatchesAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("WhapiBearerToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PhoneNumber")
@@ -232,13 +235,12 @@ namespace EonWatchesAPI.Migrations
                 {
                     b.HasOne("EonWatchesAPI.DbContext.WhitelistedGroups", "Group")
                         .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GroupId");
 
                     b.HasOne("EonWatchesAPI.DbContext.Trader", "Trader")
                         .WithMany("Ads")
                         .HasForeignKey("TraderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
