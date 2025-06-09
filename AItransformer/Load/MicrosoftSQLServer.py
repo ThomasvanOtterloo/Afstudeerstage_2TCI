@@ -13,12 +13,13 @@ class MicrosoftSQLServer(IDatabaseConnection):
         self.database = database
         self.conn = None
         self.cursor = None
-        self.table_name = "Ads"
+        self.table_name_ads = "Ads"
+        self.table_name_whitelisted_groups = "WhitelistedGroups"
         self.table_columns = None
 
     def get_table_columns(self):
         result = self.cursor.execute(
-            f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{self.table_name}'"
+            f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{self.table_name_ads}'"
         )
         columns = [row[0] for row in result]
         print("Columns:" + columns.__str__())
@@ -26,15 +27,6 @@ class MicrosoftSQLServer(IDatabaseConnection):
 
     def connect(self):
         try:
-            # self.conn = pyodbc.connect(
-            #     f'DRIVER=/opt/homebrew/Cellar/msodbcsql18/18.5.1.1/lib/libmsodbcsql.18.dylib;;'
-            #     f'SERVER={self.server},1433;'
-            #     f'DATABASE={self.database};'
-            #     f'UID=sa;'
-            #     f'PWD=MyPass@word;'
-            #     f'TrustServerCertificate=yes;'
-            # ) macos
-
             self.conn = pyodbc.connect(
                 f"DRIVER={{ODBC Driver 18 for SQL Server}};"
                 f'SERVER={self.server},1433;'
@@ -84,17 +76,37 @@ class MicrosoftSQLServer(IDatabaseConnection):
             placeholders = ", ".join(["?"] * len(known))
             values = list(known.values())
 
-            query = f"INSERT INTO {self.table_name} ({columns}) VALUES ({placeholders})"
+            query = f"INSERT INTO {self.table_name_ads} ({columns}) VALUES ({placeholders})"
 
             try:
                 self.cursor.execute(query, values)
+                print(f"✅ {len(rows)} row(s) queued for insertion.")
+
             except Exception as e:
                 print(f"❌ Failed to insert row: {e}\nRow data: {row}")
 
-        print(f"✅ {len(rows)} row(s) queued for insertion.")
 
-    def getWhitelistedGroups(self, query):
-        pass
+    def get_ad_by_message_id(self, message_id) -> bool:
+        if self.cursor is None:
+            raise RuntimeError("DB cursor not initialized; did you call connect()?")
+        query = (
+            f"SELECT TOP 1 1 "
+            f"FROM {self.table_name_ads} "
+            f"WHERE MessageId = ?"
+        )
+        self.cursor.execute(query, (message_id,))
+        return self.cursor.fetchone() is not None
+
+    def get_group_by_id(self, group_id) -> bool:
+        if self.cursor is None:
+            raise RuntimeError("DB cursor not initialized; did you call connect()?")
+        query = (
+            f"SELECT TOP 1 1 "
+            f"FROM {self.table_name_whitelisted_groups} "
+            f"WHERE Id = ?"
+        )
+        self.cursor.execute(query, (group_id,))
+        return self.cursor.fetchone() is not None
 
     def getChannelId(self, query):
         pass

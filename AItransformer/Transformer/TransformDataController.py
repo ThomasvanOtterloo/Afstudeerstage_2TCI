@@ -15,15 +15,37 @@ from Transformer.BaseTransformerModel import BaseTransformerModel
 from Transformer.BrandIdentifierDecorator import BrandIdentifierDecorator
 from Transformer.MessageProcessingService import MessageProcessingService
 
+# TransformDataController.py
+
+import pika
+from Transformer.BrandIdentifierDecorator import BrandIdentifierDecorator
+from Load.LoadDataController import LoadDataController
+from Transformer.MessageProcessingService import MessageProcessingService
+
 
 class TransformDataController:
-    def __init__(self):
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+    def __init__(
+            self,
+            identifier: BrandIdentifierDecorator,
+            load_controller: LoadDataController,
+            msg_processing_service: MessageProcessingService
+    ):
+        # shared transformer decorator
+        self.base = identifier
+
+        # persistence layer for ETL
+        self.db = load_controller
+
+        # message parsing and post-processing
+        self.msg_processing_service = msg_processing_service
+
+        # RabbitMQ setup
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters("localhost")
+        )
         self.channel = self.connection.channel()
-        self.core = BaseTransformerModel()
-        self.base = BrandIdentifierDecorator(self.core)
-        self.db = LoadDataController()
-        self.msg_processing_service = MessageProcessingService()
+
+        print("✅ TransformDataController initialized")
 
     def start_listening(self):
         print("[TransformDataController] Listening for messages on 'main_queue'...")
@@ -62,8 +84,6 @@ class TransformDataController:
             return
 
         text_output = self.base.transformData(message=ad.text)  # Applies the NER model to the text
-
-
 
         # Post-processing:
         ad = self.msg_processing_service.post_processing(text_output, ad)

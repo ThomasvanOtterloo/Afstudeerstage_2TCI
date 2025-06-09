@@ -42,14 +42,22 @@ class MessageProcessingService:
 
             # Step 2: Parse AI JSON
             parsed_output = json.loads(output)
-            print("✅ post_processing: Valid JSON detected. \n", parsed_output)
+            print("✅ post_processing: Valid JSON detected.\n", parsed_output)
 
             # 🚨 Auto-wrap single dicts into a list
             if isinstance(parsed_output, dict):
                 parsed_output = [parsed_output]
 
+            # ❌ No ads found?
+            if not parsed_output:
+                print("❌ post_processing: No ad detected (empty JSON list).")
+                return False
+
             if ad_dto.image:
-                ad_dto.image = self.download_image_and_return_filename(ad_dto.image, "D:\WatchesImages")  # Save images locally
+                ad_dto.image = self.download_image_and_return_filename(
+                    ad_dto.image,
+                    "D:\\WatchesImages"
+                )  # Save images locally
 
             # Step 3: Enrich every ad
             enriched_list = []
@@ -62,7 +70,7 @@ class MessageProcessingService:
                     "Video": ad_dto.video,
                     "PhoneNumber": ad_dto.traderNumber,
                     "TraderName": ad_dto.traderName,
-                    "TraderId": 2
+                    "TraderId": 0  # ads from WhatsApp do not have a traderId. default to 0.
                 }
                 enriched_list.append(enriched_ad)
 
