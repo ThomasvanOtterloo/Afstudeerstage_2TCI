@@ -79,7 +79,7 @@ namespace MyApi.Tests.Services
             var groupRepo = new Mock<IGroupRepository>();
             groupRepo
                 .Setup(r => r.GetWhitelistedGroups(traderId))
-                .ReturnsAsync(new[]
+                .ReturnsAsync(new List<WhitelistedGroup>
                 {
                     new WhitelistedGroup { Id = "G1" },
                     new WhitelistedGroup { Id = "G2" }
@@ -88,7 +88,7 @@ namespace MyApi.Tests.Services
             var adRepo = new Mock<IAdRepository>();
             adRepo
                 .Setup(r => r.CreateAd(It.IsAny<Ad>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(new Ad());
 
             var service = new DistributeAdService(
                 strategies,
@@ -146,10 +146,10 @@ namespace MyApi.Tests.Services
             var groupRepo = new Mock<IGroupRepository>();
             groupRepo
                 .Setup(r => r.GetWhitelistedGroups(traderId))
-                .ReturnsAsync(new[] { new WhitelistedGroup { Id = "G1" } });
+                .ReturnsAsync(new List<WhitelistedGroup> { new WhitelistedGroup { Id = "G1" } });
 
             var adRepo = new Mock<IAdRepository>();
-            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).Returns(Task.CompletedTask);
+            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).ReturnsAsync(new Ad());
 
             var service = new DistributeAdService(
                 strategies,
@@ -213,14 +213,14 @@ namespace MyApi.Tests.Services
             var groupRepo = new Mock<IGroupRepository>();
             groupRepo
                 .Setup(r => r.GetWhitelistedGroups(traderId))
-                .ReturnsAsync(new[]
+                .ReturnsAsync(new List<WhitelistedGroup>
                 {
                     new WhitelistedGroup { Id = "G1" },
                     new WhitelistedGroup { Id = "G2" }
                 });
 
             var adRepo = new Mock<IAdRepository>();
-            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).Returns(Task.CompletedTask);
+            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).ReturnsAsync(new Ad());
 
             var service = new DistributeAdService(
                 strategies,
@@ -287,10 +287,10 @@ namespace MyApi.Tests.Services
             var groupRepo = new Mock<IGroupRepository>();
             groupRepo
                 .Setup(r => r.GetWhitelistedGroups(traderId))
-                .ReturnsAsync(new[] { new WhitelistedGroup { Id = "G1" } });
+                .ReturnsAsync(new List<WhitelistedGroup> { new WhitelistedGroup { Id = "G1" } });
 
             var adRepo = new Mock<IAdRepository>();
-            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).Returns(Task.CompletedTask);
+            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).ReturnsAsync(new Ad());
 
             var service = new DistributeAdService(
                 strategies,
