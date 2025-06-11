@@ -169,7 +169,8 @@ namespace MyApi.Tests.Services
             // Arrange
             var traderId = 7;
             var bearerToken = "tok";
-            var imageBytes = Encoding.UTF8.GetBytes("fake-image-bytes");
+            var imageBytes = Convert.FromBase64String(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/6fkdwAAAABJRU5ErkJggg==");
             var formFile = CreateMockFormFile("pic.png", "image/png", imageBytes);
 
             var dto = new DistributeAdDto
@@ -263,7 +264,8 @@ namespace MyApi.Tests.Services
             // Arrange
             var traderId = 13;
             var bearerToken = "bt";
-            var bytes = Encoding.UTF8.GetBytes("x");
+            var bytes = Convert.FromBase64String(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/6fkdwAAAABJRU5ErkJggg==");
             var formFile = CreateMockFormFile("i.jpg", "image/jpeg", bytes);
 
             var dto = new DistributeAdDto
