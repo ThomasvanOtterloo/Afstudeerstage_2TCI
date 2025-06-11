@@ -177,7 +177,7 @@ namespace MyApi.Tests.Controllers
         public async Task DeWhitelistGroupId_ReturnsOk_WhenServiceSucceeds()
         {
             // Arrange
-            var traderId = "42";
+            var traderId = 42;
             var groupId = "G300";
             _groupServiceMock
                 .Setup(s => s.DeleteWhitelistedGroup(traderId, groupId))
@@ -195,7 +195,7 @@ namespace MyApi.Tests.Controllers
         public async Task DeWhitelistGroupId_ReturnsBadRequest_WhenServiceThrows()
         {
             // Arrange
-            var traderId = "84";
+            var traderId = 84;
             var groupId = "G400";
             var exceptionMessage = "Cannot delete";
             _groupServiceMock
