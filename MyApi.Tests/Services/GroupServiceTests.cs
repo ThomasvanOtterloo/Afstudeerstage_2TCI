@@ -53,8 +53,8 @@ namespace MyApi.Tests.Services
             int traderId = 5;
             var whitelisted = new List<WhitelistedGroup>
             {
-                new WhitelistedGroup { Id = "W1", GroupName = "WhiteOne", TraderId = traderId },
-                new WhitelistedGroup { Id = "W2", GroupName = "WhiteTwo", TraderId = traderId }
+                new WhitelistedGroup { Id = "W1", GroupName = "WhiteOne" },
+                new WhitelistedGroup { Id = "W2", GroupName = "WhiteTwo" }
             };
 
             _groupRepoMock

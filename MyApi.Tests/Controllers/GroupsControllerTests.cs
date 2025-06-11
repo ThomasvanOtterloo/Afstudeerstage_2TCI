@@ -81,7 +81,7 @@ namespace MyApi.Tests.Controllers
             var traderId = 123;
             var entityList = new List<WhitelistedGroup>
                 {
-                    new WhitelistedGroup { Id = "W1", GroupName = "Whitelist One", TraderId = traderId }
+                    new WhitelistedGroup { Id = "W1", GroupName = "Whitelist One" }
                 };
 
             // Note: service returns List<WhitelistedGroups>, not List<GroupDto>
