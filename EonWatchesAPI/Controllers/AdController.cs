@@ -32,20 +32,20 @@ namespace EonWatchesAPI.Controllers
             return Ok(ad);
         }
 
-        // POST /Ad
-        [HttpPost]
-        public async Task<IActionResult> CreateAd([FromBody] CreateAdDto dto)
-        {
-            // CreateAd returns an Ad object with its new Id
-            var createdAd = await _adService.CreateAd(dto);
+        //// POST /Ad // CreateAd is integrated with DistributeAd.
+        //[HttpPost]
+        //public async Task<IActionResult> CreateAd([FromBody] CreateAdDto dto)
+        //{
+        //    // CreateAd returns an Ad object with its new Id
+        //    var createdAd = await _adService.CreateAd(dto);
 
-            // Return 201 Created
-            return CreatedAtAction(
-                nameof(GetAdById),
-                new { id = createdAd.Id },
-                createdAd
-            );
-        }
+        //    // Return 201 Created
+        //    return CreatedAtAction(
+        //        nameof(GetAdById),
+        //        new { id = createdAd.Id },
+        //        createdAd
+        //    );
+        //}
 
         // GET /Ad?Brand=foo&…
         [HttpGet]

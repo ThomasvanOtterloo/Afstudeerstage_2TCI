@@ -26,11 +26,11 @@ public class AdService : IAdService
         return _adRepository.GetAdById(id);
     }
 
-    public Task<Ad> CreateAd(CreateAdDto dto)
-    {
-        //return _adRepository.CreateAd(ad);
-        return null;
-    }
+    //public Task<Ad> CreateAd(CreateAdDto dto)
+    //{
+    //    //return _adRepository.CreateAd(ad);
+    //    return null;
+    //}
 
     public Task<IEnumerable<Ad>> GetAdsByFilter(AdFilterDto filter)
     {
