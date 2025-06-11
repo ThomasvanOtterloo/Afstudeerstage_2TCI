@@ -70,42 +70,40 @@ namespace MyApi.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteWhitelistedGroup_CallsRepository_WithHardCodedTraderId()
+        public async Task DeleteWhitelistedGroup_ForwardsTraderIdToRepository()
         {
             // Arrange
-            string bearerToken = "jwt-token"; // ignored by implementation
+            int traderId = 2;
             string groupId = "G1";
 
-            // NOTE: repository.DeleteWhitelistedGroup returns Task, so we use Task.CompletedTask
             _groupRepoMock
-                .Setup(r => r.DeleteWhitelistedGroup(2, groupId))
+                .Setup(r => r.DeleteWhitelistedGroup(traderId, groupId))
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _service.DeleteWhitelistedGroup(bearerToken, groupId);
+            await _service.DeleteWhitelistedGroup(traderId, groupId);
 
-            // Assert: verify that DeleteWhitelistedGroup(2, groupId) was indeed called once
-            _groupRepoMock.Verify(r => r.DeleteWhitelistedGroup(2, groupId), Times.Once);
+            // Assert: verify that the same trader id was used
+            _groupRepoMock.Verify(r => r.DeleteWhitelistedGroup(traderId, groupId), Times.Once);
         }
 
         [Fact]
-        public async Task WhitelistGroup_CallsRepository_WithHardCodedTraderId()
+        public async Task WhitelistGroup_ForwardsTraderIdToRepository()
         {
             // Arrange
-            int traderId = 99; // ignored by implementation
+            int traderId = 99;
             string groupId = "G3";
             string groupName = "GroupThree";
 
-            // repository.WhitelistGroup also returns Task, so again use Task.CompletedTask
             _groupRepoMock
-                .Setup(r => r.WhitelistGroup(2, groupId, groupName))
+                .Setup(r => r.WhitelistGroup(traderId, groupId, groupName))
                 .Returns(Task.CompletedTask);
 
             // Act
             await _service.WhitelistGroup(traderId, groupId, groupName);
 
             // Assert
-            _groupRepoMock.Verify(r => r.WhitelistGroup(2, groupId, groupName), Times.Once);
+            _groupRepoMock.Verify(r => r.WhitelistGroup(traderId, groupId, groupName), Times.Once);
         }
     }
 }
