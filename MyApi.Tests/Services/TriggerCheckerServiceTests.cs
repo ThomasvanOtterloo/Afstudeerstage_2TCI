@@ -72,6 +72,7 @@ namespace MyApi.Tests.Services
             var ad = new Ad
             {
                 Id = 1,
+                GroupId = "51234@ai",
                 Brand = "BrandX ModelY",
                 Model = "ModelY",
                 ReferenceNumber = "REF123",
@@ -139,6 +140,7 @@ namespace MyApi.Tests.Services
             var nonMatchingAd = new Ad
             {
                 Id = 2,
+                GroupId = "51234",
                 Brand = "OtherBrand",
                 Model = "ModelZ",
                 ReferenceNumber = "REF999",

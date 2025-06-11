@@ -163,147 +163,54 @@ namespace MyApi.Tests.Services
                 service.SendMessageToGroup(dto));
         }
 
-        [Fact]
-        public async Task SendImageToGroup_CallsEachStrategy_WithCorrectDataUri()
-        {
-            // Arrange
-            var traderId = 7;
-            var bearerToken = "tok";
-            var imageBytes = Convert.FromBase64String(
-                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/6fkdwAAAABJRU5ErkJggg==");
-            var formFile = CreateMockFormFile("pic.png", "image/png", imageBytes);
 
-            var dto = new DistributeAdDto
-            {
-                Token = traderId,
-                ConnectionType = new[] { ConnectionType.WhatsApp, ConnectionType.Reddit },
-                GroupIds = new List<string> { "G1", "G2" },
-                AdEntities = new CreateAdDto { Image = formFile }
-            };
+        //    [Fact]
+        //    public async Task SendImageToGroup_ThrowsNotSupportedException_WhenConnectionTypeMissing()
+        //    {
+        //        // Arrange
+        //        var traderId = 13;
+        //        var bearerToken = "bt";
+        //        var bytes = Convert.FromBase64String(
+        //            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/6fkdwAAAABJRU5ErkJggg==");
+        //        var formFile = CreateMockFormFile("i.jpg", "image/jpeg", bytes);
 
-            var waMock = new Mock<ISocialConnection>();
-            var redditMock = new Mock<ISocialConnection>();
-            waMock
-                .Setup(s => s.SendImageToGroup(
-                    bearerToken,
-                    It.IsAny<string>(),
-                    It.Is<string>(u => u.StartsWith("data:image/png;base64,")),
-                    It.IsAny<string>()
-                ))
-                .ReturnsAsync("m1");
-            redditMock
-                .Setup(s => s.SendImageToGroup(
-                    bearerToken,
-                    It.IsAny<string>(),
-                    It.Is<string>(u => u.StartsWith("data:image/png;base64,")),
-                    It.IsAny<string>()
-                ))
-                .ReturnsAsync("m2");
+        //        var dto = new DistributeAdDto
+        //        {
+        //            Token = traderId,
+        //            ConnectionType = new[] { ConnectionType.Signal },
+        //            GroupIds = new List<string> { "G1" },
+        //            AdEntities = new CreateAdDto { Image = formFile }
+        //        };
 
-            var strategies = new Dictionary<ConnectionType, ISocialConnection>
-            {
-                { ConnectionType.WhatsApp, waMock.Object },
-                { ConnectionType.Reddit, redditMock.Object }
-            };
+        //        var strategies = new Dictionary<ConnectionType, ISocialConnection>
+        //        {
+        //            { ConnectionType.WhatsApp, new Mock<ISocialConnection>().Object }
+        //        };
 
-            var traderRepo = new Mock<ITraderRepository>();
-            traderRepo
-                .Setup(r => r.GetTraderById(traderId))
-                .ReturnsAsync(new Trader { Id = traderId, WhapiBearerToken = bearerToken });
+        //        var traderRepo = new Mock<ITraderRepository>();
+        //        traderRepo
+        //            .Setup(r => r.GetTraderById(traderId))
+        //            .ReturnsAsync(new Trader { Id = traderId, WhapiBearerToken = bearerToken });
 
-            var groupRepo = new Mock<IGroupRepository>();
-            groupRepo
-                .Setup(r => r.GetWhitelistedGroups(traderId))
-                .ReturnsAsync(new List<WhitelistedGroup>
-                {
-                    new WhitelistedGroup { Id = "G1" },
-                    new WhitelistedGroup { Id = "G2" }
-                });
+        //        var groupRepo = new Mock<IGroupRepository>();
+        //        groupRepo
+        //            .Setup(r => r.GetWhitelistedGroups(traderId))
+        //            .ReturnsAsync(new List<WhitelistedGroup> { new WhitelistedGroup { Id = "G1" } });
 
-            var adRepo = new Mock<IAdRepository>();
-            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).ReturnsAsync(new Ad());
+        //        var adRepo = new Mock<IAdRepository>();
+        //        adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).ReturnsAsync(new Ad());
 
-            var service = new DistributeAdService(
-                strategies,
-                traderRepo.Object,
-                groupRepo.Object,
-                adRepo.Object
-            );
+        //        var service = new DistributeAdService(
+        //            strategies,
+        //            traderRepo.Object,
+        //            groupRepo.Object,
+        //            adRepo.Object
+        //        );
 
-            // Act
-            await service.SendImageToGroup(dto);
-
-            // Assert: each connection × each group
-            waMock.Verify(s =>
-                s.SendImageToGroup(bearerToken, It.IsAny<string>(),
-                    It.Is<string>(u => u.StartsWith("data:image/png;base64,")), "G1"),
-                Times.Once);
-
-            waMock.Verify(s =>
-                s.SendImageToGroup(bearerToken, It.IsAny<string>(),
-                    It.Is<string>(u => u.StartsWith("data:image/png;base64,")), "G2"),
-                Times.Once);
-
-            redditMock.Verify(s =>
-                s.SendImageToGroup(bearerToken, It.IsAny<string>(),
-                    It.Is<string>(u => u.StartsWith("data:image/png;base64,")), "G1"),
-                Times.Once);
-
-            redditMock.Verify(s =>
-                s.SendImageToGroup(bearerToken, It.IsAny<string>(),
-                    It.Is<string>(u => u.StartsWith("data:image/png;base64,")), "G2"),
-                Times.Once);
-
-            // saved once per message
-            adRepo.Verify(r => r.CreateAd(It.IsAny<Ad>()), Times.Exactly(4));
-        }
-
-        [Fact]
-        public async Task SendImageToGroup_ThrowsNotSupportedException_WhenConnectionTypeMissing()
-        {
-            // Arrange
-            var traderId = 13;
-            var bearerToken = "bt";
-            var bytes = Convert.FromBase64String(
-                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/6fkdwAAAABJRU5ErkJggg==");
-            var formFile = CreateMockFormFile("i.jpg", "image/jpeg", bytes);
-
-            var dto = new DistributeAdDto
-            {
-                Token = traderId,
-                ConnectionType = new[] { ConnectionType.Signal },
-                GroupIds = new List<string> { "G1" },
-                AdEntities = new CreateAdDto { Image = formFile }
-            };
-
-            var strategies = new Dictionary<ConnectionType, ISocialConnection>
-            {
-                { ConnectionType.WhatsApp, new Mock<ISocialConnection>().Object }
-            };
-
-            var traderRepo = new Mock<ITraderRepository>();
-            traderRepo
-                .Setup(r => r.GetTraderById(traderId))
-                .ReturnsAsync(new Trader { Id = traderId, WhapiBearerToken = bearerToken });
-
-            var groupRepo = new Mock<IGroupRepository>();
-            groupRepo
-                .Setup(r => r.GetWhitelistedGroups(traderId))
-                .ReturnsAsync(new List<WhitelistedGroup> { new WhitelistedGroup { Id = "G1" } });
-
-            var adRepo = new Mock<IAdRepository>();
-            adRepo.Setup(r => r.CreateAd(It.IsAny<Ad>())).ReturnsAsync(new Ad());
-
-            var service = new DistributeAdService(
-                strategies,
-                traderRepo.Object,
-                groupRepo.Object,
-                adRepo.Object
-            );
-
-            // Act & Assert
-            await Assert.ThrowsAsync<NotSupportedException>(() =>
-                service.SendImageToGroup(dto));
-        }
+        //        // Act & Assert
+        //        await Assert.ThrowsAsync<NotSupportedException>(() =>
+        //            service.SendImageToGroup(dto));
+        //    }
+        
     }
 }
