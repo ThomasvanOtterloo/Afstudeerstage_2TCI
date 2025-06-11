@@ -69,6 +69,8 @@ builder.Services.AddScoped<ITraderRepository, TraderRepository>();
 builder.Services.AddScoped<IDistributeAdRepository, DistributeAdRepository>();
 builder.Services.AddScoped<ITriggerRepository, TriggerRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<TraderRepository>();
+
 
 // services
 builder.Services.AddScoped<IAdService, AdService>();

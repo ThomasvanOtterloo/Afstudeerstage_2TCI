@@ -4,7 +4,7 @@
     {
         public Task WhitelistGroup(int traderId, string groupId, string groupName);
         public Task DeleteWhitelistedGroup(int traderId, string groupId);
-        public Task<List<WhitelistedGroups>> GetWhitelistedGroups(int traderId);
+        public Task<List<WhitelistedGroup>> GetWhitelistedGroups(int traderId);
 
     }
 }

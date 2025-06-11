@@ -28,8 +28,8 @@ public class AdService : IAdService
 
     public Task<Ad> CreateAd(CreateAdDto dto)
     {
-        var ad = dto.ToEntity();
-        return _adRepository.CreateAd(ad);
+        //return _adRepository.CreateAd(ad);
+        return null;
     }
 
     public Task<IEnumerable<Ad>> GetAdsByFilter(AdFilterDto filter)

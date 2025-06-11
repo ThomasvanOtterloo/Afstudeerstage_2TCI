@@ -7,8 +7,8 @@ namespace EonWatchesAPI.Services.I_Services;
 
 public interface IDistributeAdService
 {
-    public Task SendImageToGroup(SendImageCaptionDto ad);
-    public Task SendMessageToGroup(SendMessageDto ad);
+    public Task SendImageToGroup(DistributeAdDto ad);
+    public Task SendMessageToGroup(DistributeAdDto ad);
 
 
 }

@@ -32,7 +32,7 @@ namespace MyApi.Tests.Services
 
             // 3) Create and register a Mock<INotification>
             _notificationMock = new Mock<INotification>();
-            services.AddSingleton(_notificationMock.Object);
+            services.AddSingleton<INotification>(_notificationMock.Object);
 
             // 4) Build the provider
             _serviceProvider = services.BuildServiceProvider();
@@ -72,6 +72,7 @@ namespace MyApi.Tests.Services
             var ad = new Ad
             {
                 Id = 1,
+                GroupId = "51234@ai",
                 Brand = "BrandX ModelY",
                 Model = "ModelY",
                 ReferenceNumber = "REF123",
@@ -92,7 +93,8 @@ namespace MyApi.Tests.Services
 
             _notificationMock
                 .Setup(n => n.SendNotification(It.IsAny<SendEmailRequest>()))
-                .Callback(() => tcs.TrySetResult(true));
+                .Callback(() => tcs.TrySetResult(true))
+                .Returns(Task.CompletedTask);
 
             // Use a CancellationTokenSource that we will cancel manually
             var cts = new CancellationTokenSource();
@@ -138,6 +140,7 @@ namespace MyApi.Tests.Services
             var nonMatchingAd = new Ad
             {
                 Id = 2,
+                GroupId = "51234",
                 Brand = "OtherBrand",
                 Model = "ModelZ",
                 ReferenceNumber = "REF999",
@@ -152,7 +155,8 @@ namespace MyApi.Tests.Services
             var tcs = new TaskCompletionSource<bool>();
             _notificationMock
                 .Setup(n => n.SendNotification(It.IsAny<SendEmailRequest>()))
-                .Callback(() => tcs.TrySetResult(true));
+                .Callback(() => tcs.TrySetResult(true))
+                .Returns(Task.CompletedTask);
 
             var cts = new CancellationTokenSource();
 

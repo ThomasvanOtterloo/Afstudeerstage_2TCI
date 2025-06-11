@@ -79,9 +79,9 @@ namespace MyApi.Tests.Controllers
         {
             // Arrange
             var traderId = 123;
-            var entityList = new List<WhitelistedGroups>
+            var entityList = new List<WhitelistedGroup>
                 {
-                    new WhitelistedGroups { Id = "W1", GroupName = "Whitelist One", TraderId = traderId }
+                    new WhitelistedGroup { Id = "W1", GroupName = "Whitelist One" }
                 };
 
             // Note: service returns List<WhitelistedGroups>, not List<GroupDto>
@@ -177,7 +177,7 @@ namespace MyApi.Tests.Controllers
         public async Task DeWhitelistGroupId_ReturnsOk_WhenServiceSucceeds()
         {
             // Arrange
-            var traderId = "42";
+            var traderId = 42;
             var groupId = "G300";
             _groupServiceMock
                 .Setup(s => s.DeleteWhitelistedGroup(traderId, groupId))
@@ -195,7 +195,7 @@ namespace MyApi.Tests.Controllers
         public async Task DeWhitelistGroupId_ReturnsBadRequest_WhenServiceThrows()
         {
             // Arrange
-            var traderId = "84";
+            var traderId = 84;
             var groupId = "G400";
             var exceptionMessage = "Cannot delete";
             _groupServiceMock

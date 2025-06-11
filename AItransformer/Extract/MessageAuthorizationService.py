@@ -1,29 +1,31 @@
+from Load import MicrosoftSQLServer, DatabaseConnection
+
+
 class MessageAuthorizationService:
-    """
-    Service for authorizing messages.
-    """
+    def __init__(self, db: DatabaseConnection):
+        self.db = db
 
-    def __init__(self, database_controller=None):
-        DatabaseController = None
+    def is_valid(self, data):
+        # Check if the message already exists in the database
+        print(data)
+        msg_id = data["messages"][0]["id"]
+        group_id = data["messages"][0]["chat_id"]
+        if self.message_exists(msg_id):
+            print(f"❌ Message already exists in the database: {msg_id}")
+            return False
 
-    def authorize_message(self, message_id, user_id):
-
+        # Check if the message is from a whitelisted group
+        if not self.message_from_whitelisted_group(group_id):
+            print(f"❌ Message from non-whitelisted group: {group_id}")
+            return False
         return True
 
-    def is_authorized(self, user, message):
-        """
-        Check if a user is authorized to access a message.
-        """
-        # Implement your authorization logic here
-        return True
+    def message_exists(self, message_id):
+        if self.db.get_ad_by_message_id(message_id):
+            return True
+        return False
 
-    def getWhitelistedGroups(self):
-        # get whitelisted groups from the database
-        # return a list of group IDs
-        return ["groupId': '120363416829988594@g.us", "67890"]
-
-    def match_group(self, group_id):
-        # check if groupId is in the whitelist
-        # return True or False
-        whitelisted_groups = self.getWhitelistedGroups()
-        return group_id in whitelisted_groups
+    def message_from_whitelisted_group(self, group_id):
+        if self.db.get_group_by_id(group_id):
+            return True
+        return False

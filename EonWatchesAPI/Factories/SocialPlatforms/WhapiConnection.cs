@@ -1,4 +1,4 @@
-using EonWatchesAPI.Dtos;
+﻿using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Factories;
 using RestSharp;
 using System.Text.Json;
@@ -11,50 +11,127 @@ public class WhapiConnection : ISocialConnection
     private readonly string imageUrl = "https://gate.whapi.cloud/messages/image";
     private readonly string groupUrl = "https://gate.whapi.cloud/groups?count=100";
 
-    public async Task SendTextToGroups(string bearerToken, string text, List<string> groupIds)
+    public async Task<string> SendTextToGroup(
+    string bearerToken,
+    string text,
+    string groupId
+)
     {
         var client = new RestClient(new RestClientOptions(textUrl));
-        foreach (var id in groupIds)
-        {
-            var request = new RestRequest();
-            request.AddHeader("accept", "application/json");
-            request.AddHeader("authorization", $"Bearer {bearerToken}");
-            request.AddJsonBody(new
+        var request = new RestRequest()
+            .AddHeader("accept", "application/json")
+            .AddHeader("authorization", $"Bearer {bearerToken}")
+            .AddJsonBody(new
             {
-                typing_time = 3,
-                to = id,
+                typing_time = 2,
+                to = groupId,
                 body = text
             });
 
-            var response = await client.PostAsync(request);
-            Console.WriteLine(response.Content);
-            await Task.Delay(3000);
+        RestResponse response;
+        try
+        {
+            response = await client.ExecuteAsync(request, Method.Post);
+        }
+        catch (Exception netEx)
+        {
+            // network / protocol errors (DNS, TLS, socket, etc.)
+            throw new HttpRequestException(
+                "Failed to connect to WhatsApp text API",
+                netEx
+            );
+        }
+
+        if (!response.IsSuccessful)
+        {
+            // capture body + any RestSharp‐side exception
+            var body = response.Content ?? "<no response body>";
+            var err = response.ErrorException;
+
+            throw new HttpRequestException(
+                $"WhatsApp text API returned {(int)response.StatusCode} {response.StatusDescription}: {body}",
+                err
+            );
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(response.Content!);
+            return doc.RootElement
+                      .GetProperty("message")
+                      .GetProperty("id")
+                      .GetString()!;
+        }
+        catch (Exception parseEx)
+        {
+            throw new InvalidOperationException(
+                "Failed to parse WhatsApp text API response",
+                parseEx
+            );
         }
     }
 
-    public async Task SendImageToGroups(string bearerToken, string caption, string base64Image, List<string> groupIds)
+    public async Task<string> SendImageToGroup(
+        string bearerToken,
+        string caption,
+        string base64Image,
+        string groupId
+    )
     {
         var client = new RestClient(new RestClientOptions(imageUrl));
-        foreach (var id in groupIds)
-        {
-            var request = new RestRequest();
-            request.AddHeader("accept", "application/json");
-            request.AddHeader("authorization", $"Bearer {bearerToken}");
-            request.AddJsonBody(new
+        var request = new RestRequest()
+            .AddHeader("accept", "application/json")
+            .AddHeader("authorization", $"Bearer {bearerToken}")
+            .AddJsonBody(new
             {
-                typing_time = 3,
-                to = id,
+                typing_time = 2,
+                to = groupId,
                 caption,
                 media = base64Image
             });
 
-            var response = await client.PostAsync(request);
-            if (!response.IsSuccessful)
-                throw new HttpRequestException($"Failed: {(int)response.StatusCode} {response.StatusDescription}");
+        RestResponse response;
+        try
+        {
+            response = await client.ExecuteAsync(request, Method.Post);
+        }
+        catch (Exception netEx)
+        {
+            throw new HttpRequestException(
+                "Failed to connect to WhatsApp image API",
+                netEx
+            );
+        }
 
-            await Task.Delay(3000);
+        if (!response.IsSuccessful)
+        {
+            var body = response.Content ?? "<no response body>";
+            var err = response.ErrorException;
+
+            throw new HttpRequestException(
+                $"WhatsApp image API returned {(int)response.StatusCode} {response.StatusDescription}: {body}",
+                err
+            );
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(response.Content!);
+            return doc.RootElement
+                      .GetProperty("message")
+                      .GetProperty("id")
+                      .GetString()!;
+        }
+        catch (Exception parseEx)
+        {
+            throw new InvalidOperationException(
+                "Failed to parse WhatsApp image API response",
+                parseEx
+            );
         }
     }
+
+
 
     public async Task<List<GroupDto>> GetGroupsByUser(string bearerToken)
     {

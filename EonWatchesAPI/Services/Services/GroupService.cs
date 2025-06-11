@@ -21,10 +21,10 @@ namespace EonWatchesAPI.Services.Services
         
         }
 
-        public Task DeleteWhitelistedGroup(string bearerToken, string groupId)
+        public Task DeleteWhitelistedGroup(int traderId, string groupId)
         {
             // get TraderId out of token data.
-            return _groupRepository.DeleteWhitelistedGroup(2, groupId);   
+            return _groupRepository.DeleteWhitelistedGroup(traderId, groupId);   
         }
 
         public Task<List<GroupDto>> GetGroups(string bearerToken)
@@ -33,7 +33,7 @@ namespace EonWatchesAPI.Services.Services
             return result;
         }
 
-        public Task<List<WhitelistedGroups>> GetWhitelistedGroups(int traderId)
+        public Task<List<WhitelistedGroup>> GetWhitelistedGroups(int traderId)
         {
             return _groupRepository.GetWhitelistedGroups(traderId);
         }
@@ -42,7 +42,7 @@ namespace EonWatchesAPI.Services.Services
         public Task WhitelistGroup(int traderId, string groupId, string groupName)
         {
             // get traderId from token data
-            return _groupRepository.WhitelistGroup(2, groupId, groupName);
+            return _groupRepository.WhitelistGroup(traderId, groupId, groupName);
         }
     }
 }

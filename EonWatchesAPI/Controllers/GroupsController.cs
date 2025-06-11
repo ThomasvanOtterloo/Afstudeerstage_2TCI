@@ -61,7 +61,7 @@ namespace EonWatchesAPI.Controllers
         }
 
         [HttpDelete("DeWhitelistGroups")]
-        public async Task<IActionResult> DeWhitelistGroupId(string traderId, string groupId)
+        public async Task<IActionResult> DeWhitelistGroupId(int traderId, string groupId)
         {
             try
             {

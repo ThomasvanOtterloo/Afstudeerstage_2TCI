@@ -6,8 +6,8 @@ from Load.MicrosoftSQLServer import MicrosoftSQLServer
 
 class LoadDataController:
 
-    def __init__(self):
-        self.database = MicrosoftSQLServer()
+    def __init__(self, database: IDatabaseConnection):
+        self.database = database
         self.database.connect()
         pass
 
