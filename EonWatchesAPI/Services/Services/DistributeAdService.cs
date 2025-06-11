@@ -40,8 +40,8 @@ namespace EonWatchesAPI.Services.Services
         public async Task SendMessageToGroup(DistributeAdDto dto)
         {
             var trader = await GetValidatedTrader(dto.Token);
+            Console.WriteLine(trader.WhapiBearerToken);
             await ValidateGroups(dto.GroupIds, trader.Id);
-
             var payloadText = BuildTextPayload(dto.AdEntities);
 
             await ProcessDistribution(
@@ -127,35 +127,36 @@ namespace EonWatchesAPI.Services.Services
             Trader trader
         )
         {
-            foreach (var type in connectionTypes)
-            {
-                if (!_strategies.TryGetValue(type, out var strategy))
-                    throw new NotSupportedException($"Unsupported connection type: {type}");
-
-                foreach (var groupId in groupIds)
+           
+                foreach (var type in connectionTypes)
                 {
-                    string messageId = dataUrlImage != null
-                        ? await strategy.SendImageToGroup(
-                            trader.WhapiBearerToken,
-                            textPayload,
-                            dataUrlImage,
-                            groupId
-                          )
-                        : await strategy.SendTextToGroup(
-                            trader.WhapiBearerToken,
-                            textPayload,
-                            groupId
-                          );
+                    if (!_strategies.TryGetValue(type, out var strategy))
+                        throw new NotSupportedException($"Unsupported connection type: {type}");
+                    foreach (var groupId in groupIds)
+                    {
+                        string messageId = dataUrlImage != null
+                            ? await strategy.SendImageToGroup(
+                                trader.WhapiBearerToken,
+                                textPayload,
+                                dataUrlImage,
+                                groupId
+                              )
+                            : await strategy.SendTextToGroup(
+                                trader.WhapiBearerToken,
+                                textPayload,
+                                groupId
+                              );
 
-                    await SaveAdToDatabase(
-                        dto: adDto,
-                        imgPointer: imgPointer,
-                        trader: trader,
-                        messageId: messageId,
-                        groupId: groupId
-                    );
+                        await SaveAdToDatabase(
+                            dto: adDto,
+                            imgPointer: imgPointer,
+                            trader: trader,
+                            messageId: messageId,
+                            groupId: groupId
+                        );
+                    }
                 }
-            }
+            
         }
 
         private async Task SaveAdToDatabase(
@@ -215,20 +216,35 @@ namespace EonWatchesAPI.Services.Services
         private string TurnAdIntoString(CreateAdDto ad)
         {
             var parts = new List<string>();
+            // list of property‐names you want to skip entirely
+            var skip = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "TraderId",
+                    "Image",     // whatever your property is called
+                    "Video",     // or VideoUrl / VideoPointer etc.
+                };
+
             foreach (var prop in typeof(CreateAdDto).GetProperties())
             {
+                if (skip.Contains(prop.Name))
+                    continue;
+
                 if (typeof(IFormFile).IsAssignableFrom(prop.PropertyType))
                     continue;
 
                 var raw = prop.GetValue(ad);
-                if (raw == null) continue;
+                if (raw == null)
+                    continue;
+
                 if (prop.PropertyType == typeof(string) &&
                     string.IsNullOrWhiteSpace((string)raw))
                     continue;
 
                 parts.Add($"{prop.Name}: {raw}");
             }
+
             return string.Join(", ", parts);
         }
+
     }
 }

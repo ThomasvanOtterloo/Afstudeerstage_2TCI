@@ -80,11 +80,12 @@ public class TriggerCheckerService : BackgroundService
 
                                 var emailInfo = new SendEmailRequest(
                                     Subject: "Your Watch Trigger Fired!",
-                                    Body: $"Hello {trig.Trader.Name},\n\n" +
+                                    Body: $"Hello {trig.Trader.Name} <br/><br/>" +
                                                     $"An ad (# {ad.Id}) for “{ad.Brand} {ad.Model}” " +
                                                     $"with ref \"{ad.ReferenceNumber}\" just appeared " +
-                                                    $"that matches your trigger settings.\n\n" +
-                                                    $"Message {ad.TraderName} now at {ad.PhoneNumber} to see whats up! \n\n" +
+                                                    $"that matches your trigger settings.<br/>" +
+                                                    $"Message {ad.TraderName} now at {ad.PhoneNumber} to see whats up! <br/><br/>" +
+                                                    $"Take a look at the ad for further details at: http://localhost:5200/admin/catalog/{ad.Id} <br/><br/><br/><br/>" +
                                                     "– EonWatches Bot",
                                     RecipientEmail: trig.Trader.Email
                                 );

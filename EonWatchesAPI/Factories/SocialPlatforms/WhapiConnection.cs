@@ -1,4 +1,4 @@
-using EonWatchesAPI.Dtos;
+﻿using EonWatchesAPI.Dtos;
 using EonWatchesAPI.Factories;
 using RestSharp;
 using System.Text.Json;
@@ -28,20 +28,49 @@ public class WhapiConnection : ISocialConnection
                 body = text
             });
 
-        var response = await client.PostAsync(request);
-        if (!response.IsSuccessful)
+        RestResponse response;
+        try
+        {
+            response = await client.ExecuteAsync(request, Method.Post);
+        }
+        catch (Exception netEx)
+        {
+            // network / protocol errors (DNS, TLS, socket, etc.)
             throw new HttpRequestException(
-                $"Failed: {(int)response.StatusCode} {response.StatusDescription}"
+                "Failed to connect to WhatsApp text API",
+                netEx
             );
+        }
 
-        using var doc = JsonDocument.Parse(response.Content!);
-        return doc.RootElement
-                  .GetProperty("message")
-                  .GetProperty("id")
-                  .GetString()!;
+        if (!response.IsSuccessful)
+        {
+            // capture body + any RestSharp‐side exception
+            var body = response.Content ?? "<no response body>";
+            var err = response.ErrorException;
+
+            throw new HttpRequestException(
+                $"WhatsApp text API returned {(int)response.StatusCode} {response.StatusDescription}: {body}",
+                err
+            );
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(response.Content!);
+            return doc.RootElement
+                      .GetProperty("message")
+                      .GetProperty("id")
+                      .GetString()!;
+        }
+        catch (Exception parseEx)
+        {
+            throw new InvalidOperationException(
+                "Failed to parse WhatsApp text API response",
+                parseEx
+            );
+        }
     }
 
-    // 1) Update your ISocialConnection implementation to handle one groupId and return the DTO:
     public async Task<string> SendImageToGroup(
         string bearerToken,
         string caption,
@@ -61,22 +90,47 @@ public class WhapiConnection : ISocialConnection
                 media = base64Image
             });
 
-        var response = await client.PostAsync(request);
-        if (!response.IsSuccessful)
+        RestResponse response;
+        try
+        {
+            response = await client.ExecuteAsync(request, Method.Post);
+        }
+        catch (Exception netEx)
+        {
             throw new HttpRequestException(
-                $"Failed: {(int)response.StatusCode} {response.StatusDescription}"
+                "Failed to connect to WhatsApp image API",
+                netEx
             );
+        }
 
-        // parse out the message.id
-        using var doc = JsonDocument.Parse(response.Content!);
-        string messageId = doc.RootElement
-                           .GetProperty("message")
-                           .GetProperty("id")
-                           .GetString()!;
+        if (!response.IsSuccessful)
+        {
+            var body = response.Content ?? "<no response body>";
+            var err = response.ErrorException;
 
-        // return our DistributeAdResultDto
-        return messageId;
+            throw new HttpRequestException(
+                $"WhatsApp image API returned {(int)response.StatusCode} {response.StatusDescription}: {body}",
+                err
+            );
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(response.Content!);
+            return doc.RootElement
+                      .GetProperty("message")
+                      .GetProperty("id")
+                      .GetString()!;
+        }
+        catch (Exception parseEx)
+        {
+            throw new InvalidOperationException(
+                "Failed to parse WhatsApp image API response",
+                parseEx
+            );
+        }
     }
+
 
 
     public async Task<List<GroupDto>> GetGroupsByUser(string bearerToken)

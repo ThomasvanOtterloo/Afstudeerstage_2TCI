@@ -70,7 +70,7 @@ class MessageProcessingService:
                     "Video": ad_dto.video,
                     "PhoneNumber": ad_dto.traderNumber,
                     "TraderName": ad_dto.traderName,
-                    "TraderId": 0  # ads from WhatsApp do not have a traderId. default to 0.
+                    "TraderId": None  # ads from WhatsApp do not have a traderId. default to 0.
                 }
                 enriched_list.append(enriched_ad)
 

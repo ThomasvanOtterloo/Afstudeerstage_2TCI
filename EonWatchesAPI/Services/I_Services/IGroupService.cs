@@ -9,8 +9,8 @@ namespace EonWatchesAPI.Services.I_Services
 
         public Task<List<GroupDto>> GetGroups(string bearerToken);
         public Task WhitelistGroup(int traderId, string groupId, string groupName);
-        public Task DeleteWhitelistedGroup(string bearerToken, string groupId);
-        public Task<List<WhitelistedGroups>> GetWhitelistedGroups(int traderId);
+        public Task DeleteWhitelistedGroup(int bearerToken, string groupId);
+        public Task<List<WhitelistedGroup>> GetWhitelistedGroups(int traderId);
 
     }
 }

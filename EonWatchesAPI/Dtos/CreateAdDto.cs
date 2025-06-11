@@ -8,8 +8,6 @@ namespace EonWatchesAPI.Dtos
         public string? Model { get; set; }
         public string? ReferenceNumber { get; set; }
         public Decimal? Price { get; set; }
-        //public string MessageId { get; set; }
-        //public string? GroupId { get; set; }
         public string? Currency { get; set; }
         public IFormFile? Image { get; set; }
         public string? Video { get; set; }

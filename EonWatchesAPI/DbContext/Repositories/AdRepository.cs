@@ -56,5 +56,18 @@ public class AdRepository : IAdRepository
         return await q.OrderByDescending(a => a.CreatedAt).ToListAsync();
     }
 
+    public async Task RemoveAdByGroupId(string groupId)
+    {
+        // Fetch all ads for the given groupId
+        var adsToRemove = _context.Ads.Where(ad => ad.GroupId == groupId);
+
+        // Remove them in one batch
+        _context.Ads.RemoveRange(adsToRemove);
+
+        // Persist changes
+        await _context.SaveChangesAsync();
+    }
+
+
 
 }
