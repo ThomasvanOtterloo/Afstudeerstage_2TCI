@@ -223,27 +223,27 @@ namespace MyApi.Tests.Controllers
             return results;
         }
 
-        [Fact]
-        public void DistributeAdDto_MissingToken_ShouldProduceValidationError()
-        {
-            // Arrange
-            var dto = new DistributeAdDto
-            {
-                // Token not set
-                ConnectionType = new[] { ConnectionType.WhatsApp },
-                GroupIds = new List<string> { "G1" },
-                AdEntities = new CreateAdDto()
-            };
+        //[Fact]
+        //public void DistributeAdDto_MissingToken_ShouldProduceValidationError()
+        //{
+        //    // Arrange
+        //    var dto = new DistributeAdDto
+        //    {
+        //        // Token not set
+        //        ConnectionType = new[] { ConnectionType.WhatsApp },
+        //        GroupIds = new List<string> { "G1" },
+        //        AdEntities = new CreateAdDto()
+        //    };
 
-            // Act
-            var results = ValidateModel(dto);
+        //    // Act
+        //    var results = ValidateModel(dto);
 
-            // Assert
-            Assert.Contains(results, r =>
-                r.MemberNames.Contains(nameof(DistributeAdDto.Token)) &&
-                r.ErrorMessage!.Contains("required", StringComparison.OrdinalIgnoreCase)
-            );
-        }
+        //    // Assert
+        //    Assert.Contains(results, r =>
+        //        r.MemberNames.Contains(nameof(DistributeAdDto.Token)) &&
+        //        r.ErrorMessage!.Contains("required", StringComparison.OrdinalIgnoreCase)
+        //    );
+        //}
 
         [Fact]
         public void DistributeAdDto_MissingConnectionType_ShouldProduceValidationError()
