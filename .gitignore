@@ -500,3 +500,5 @@ AItransformer/Tests/unsloth_compiled_cache/
 MyApi.Tests/TestReports/
 
 AItransformer/Tests/
+
+AItransformer/Model/qwen3.Q4_K_M.gguf
