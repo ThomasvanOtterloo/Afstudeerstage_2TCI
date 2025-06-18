@@ -1,6 +1,7 @@
 import unittest
 import csv
 import json
+import time
 from pathlib import Path
 from datetime import datetime
 
@@ -15,6 +16,7 @@ class TestNERModelFromCSV(unittest.TestCase):
         core = BaseTransformerModel()
         cls.model = BrandIdentifierDecorator(core)
         cls.failures = []
+        cls.timings = []  # will hold per-message durations
 
     def load_test_cases(self, filepath):
         with open(filepath, encoding="utf-8") as f:
@@ -23,7 +25,7 @@ class TestNERModelFromCSV(unittest.TestCase):
     def test_csv_cases(self):
         """
         For each CSV row: parse the expected JSON list-of-objects,
-        run the model, parse its actual JSON list-of-objects,
+        run the model (timing it), parse its actual JSON,
         then spawn exactly one subTest for each expected object index.
         """
         csv_path = Path(__file__).parent / "testData.csv"
@@ -34,7 +36,7 @@ class TestNERModelFromCSV(unittest.TestCase):
             len(json.loads(row["Output"]))
             for row in test_cases
         )
-        failed_objects = 0     # how many object-level checks fail
+        failed_objects = 0  # how many object-level checks fail
 
         # Now iterate row-by-row
         for row_index, row in enumerate(test_cases):
@@ -46,9 +48,6 @@ class TestNERModelFromCSV(unittest.TestCase):
                 if not isinstance(expected_output, list):
                     raise ValueError("Expected JSON is not a list of objects")
             except Exception as e:
-                # If the CSV “Output” cell itself is malformed, treat each
-                # expected-object as “lost” – but here we just bail out all
-                # object-level tests for that row at once.
                 self.failures.append({
                     "row_index": row_index,
                     "input": input_text,
@@ -56,18 +55,16 @@ class TestNERModelFromCSV(unittest.TestCase):
                     "error": str(e),
                     "raw_expected": row["Output"]
                 })
-                # We still want to count ALL the objects in expected_output
-                # as “failed,” but we didn’t know how many because parsing failed.
-                # Simplest: mark the entire row’s objects as missing.
-                # If the CSV JSON parser itself failed, we can count 1 failure per row:
                 failed_objects += 1
-                # Immediately record a failure for *this entire row*, then skip to next row:
                 self.fail(f"Row {row_index}: cannot parse expected JSON → {e!r}")
                 continue
 
-            # Next, run the model
+            # Run & time the model
             try:
+                start = time.perf_counter()
                 actual_json = self.model.transformData(json.dumps(input_text))
+                elapsed = time.perf_counter() - start
+                self.timings.append(elapsed)
             except Exception as e:
                 self.failures.append({
                     "row_index": row_index,
@@ -75,9 +72,6 @@ class TestNERModelFromCSV(unittest.TestCase):
                     "stage": "transformData_error",
                     "error": str(e)
                 })
-                # All expected objects for this row become “failed,” but
-                # we’ll still explicitly iterate them below to generate subTests.
-                # For now just record a failure for each expected object:
                 failed_objects += len(expected_output)
                 self.fail(f"Row {row_index}: transformData() raised exception → {e!r}")
                 continue
@@ -95,20 +89,15 @@ class TestNERModelFromCSV(unittest.TestCase):
                     "error": str(e),
                     "raw_output": actual_json
                 })
-                # Mark every expected object as “failed” if we couldn’t parse actual JSON
                 failed_objects += len(expected_output)
                 self.fail(f"Row {row_index}: cannot parse actual JSON → {e!r}")
                 continue
 
-            # Now we know expected_output and actual_output are both lists.
-            # We want exactly one subTest per index in range(len(expected_output)).
-            # If actual_output has fewer items, we’ll catch IndexError and record a “missing” error.
-            # If actual_output has extra items, we simply ignore them (we only test indices up to len(expected_output)-1).
-
+            # Validate each expected object
             for i in range(len(expected_output)):
                 with self.subTest(row_index=row_index, object_index=i):
                     expected_obj = expected_output[i]
-                    # If actual_output is shorter than expected, that's a missing-object failure:
+
                     if i >= len(actual_output):
                         failed_objects += 1
                         self.failures.append({
@@ -119,14 +108,13 @@ class TestNERModelFromCSV(unittest.TestCase):
                             "expected": expected_obj,
                             "actual": None,
                         })
-                        self.fail(f"Row {row_index}, object {i}: expected object is missing in actual output.")
-                        # Continue to next object‐subTest
+                        self.fail(f"Row {row_index}, object {i}: expected object is missing.")
                         continue
 
                     actual_obj = actual_output[i]
                     object_errors = []
 
-                    # Example field checks (Brand and ReferenceNumber).  Add more as needed.
+                    # Example field checks
                     if "Brand" in expected_obj:
                         if "Brand" not in actual_obj:
                             object_errors.append(
@@ -153,10 +141,9 @@ class TestNERModelFromCSV(unittest.TestCase):
                                     f"ReferenceNumber mismatch: expected '{expected_obj['ReferenceNumber']}', got '{actual_obj['ReferenceNumber']}'"
                                 )
 
-                    # … you can add more field‐by‐field comparisons here exactly as you like …
+                    # You can add more field-by-field comparisons here...
 
                     if object_errors:
-                        # Record that this single object-subTest failed, with all errors joined
                         failed_objects += 1
                         self.failures.append({
                             "row_index": row_index,
@@ -169,19 +156,33 @@ class TestNERModelFromCSV(unittest.TestCase):
                         })
                         combined = "\n  - " + "\n  - ".join(object_errors)
                         self.fail(f"Row {row_index}, object {i} failed:\n  -{combined}")
-                    # If no errors, this subTest “passes” automatically
 
-        # At the end, write out a JSON failure log if there were any fails
+        # At the end, write out a JSON failure log if there were any failures
         if self.failures:
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             log_path = Path(__file__).parent / f"ner_test_failures_{timestamp}.json"
-            with open(log_path.with_suffix(".json"), "w", encoding="utf-8") as f:
+            with open(log_path, "w", encoding="utf-8") as f:
                 json.dump(self.failures, f, indent=2, ensure_ascii=False)
-            print(f"\n❌ Logged {len(self.failures)} object‐level failures to {log_path.name}")
+            print(f"\n❌ Logged {len(self.failures)} object-level failures to {log_path.name}")
+
+        # Print performance summary
+        if self.timings:
+            total_time = sum(self.timings)
+            per_msg_avg = total_time / len(self.timings)
+            per_obj_avg = total_time / total_expected_objects
+            print(
+                f"\n⏱ Performance: {len(self.timings)} messages in {total_time:.2f}s "
+                f"(avg {per_msg_avg:.4f}s/msg, {per_obj_avg:.4f}s/object)"
+            )
 
         passed_objects = total_expected_objects - failed_objects
         pct = round((passed_objects / total_expected_objects) * 100, 2) if total_expected_objects else 0
         print(f"\n✅ Test Summary: {passed_objects}/{total_expected_objects} objects passed ({pct}%)")
+
+    @classmethod
+    def tearDownClass(cls):
+        # Optionally, you could dump timings or additional artifacts here
+        pass
 
 
 if __name__ == '__main__':
