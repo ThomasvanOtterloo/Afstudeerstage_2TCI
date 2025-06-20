@@ -10,6 +10,7 @@ class MessageAuthorizationService:
         print(data)
         msg_id = data["messages"][0]["id"]
         group_id = data["messages"][0]["chat_id"]
+        # Object van maken, en dan parsen.
         if self.message_exists(msg_id):
             print(f"❌ Message already exists in the database: {msg_id}")
             return False

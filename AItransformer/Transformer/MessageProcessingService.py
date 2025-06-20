@@ -56,7 +56,7 @@ class MessageProcessingService:
             if ad_dto.image:
                 ad_dto.image = self.download_image_and_return_filename(
                     ad_dto.image,
-                    "D:\\WatchesImages"
+                    "D:\\WatchesImages" ##
                 )  # Save images locally
 
             # Step 3: Enrich every ad
@@ -70,7 +70,7 @@ class MessageProcessingService:
                     "Video": ad_dto.video,
                     "PhoneNumber": ad_dto.traderNumber,
                     "TraderName": ad_dto.traderName,
-                    "TraderId": None  # ads from WhatsApp do not have a traderId. default to 0.
+                    "TraderId": None
                 }
                 enriched_list.append(enriched_ad)
 

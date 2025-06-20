@@ -30,6 +30,7 @@ public class AdRepository : IAdRepository
 
     public async Task<Ad> GetAdById(int id)
         => await _context.Ads.FirstOrDefaultAsync(a => a.Id == id);
+// .find
 
     public async Task<Ad> CreateAd(Ad ad)
     {
@@ -65,6 +66,7 @@ public class AdRepository : IAdRepository
         var list = await q
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
+//
 
         return list
             .GroupBy(a => new { a.ReferenceNumber, a.PhoneNumber, a.Price })

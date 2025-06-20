@@ -52,7 +52,7 @@ class TransformDataController:
 
         self.channel.basic_qos(prefetch_count=1)  # Fair dispatch
         self.channel.basic_consume(queue='main_queue', on_message_callback=self.handle_message)
-
+# Gebruik een centrale config file ipv hardcoded.
         self.channel.start_consuming()
 
     def handle_message(self, ch, method, properties, body):

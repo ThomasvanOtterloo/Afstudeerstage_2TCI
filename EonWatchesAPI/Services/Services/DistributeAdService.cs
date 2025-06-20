@@ -242,6 +242,7 @@ namespace EonWatchesAPI.Services.Services
 
                 parts.Add($"{prop.Name}: {raw}");
             }
+            // string builder.
 
             return string.Join(", ", parts);
         }
